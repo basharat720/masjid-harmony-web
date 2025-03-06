@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, BookOpen, FileText, Settings } from 'lucide-react';
+import { Menu, X, FileText, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -27,9 +27,6 @@ const Navbar = () => {
             <Link to="/" className="navbar-link">Home</Link>
             <Link to="/blog" className="navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
-            </Link>
-            <Link to="/quran-resources" className="navbar-link flex items-center">
-              <BookOpen size={16} className="mr-1" /> Quran & Resources
             </Link>
             <Link to="/about" className="navbar-link">About Us</Link>
             <Link to="/prayer-times" className="navbar-link">Prayer Times</Link>
@@ -57,9 +54,6 @@ const Navbar = () => {
             <Link to="/" className="block navbar-link">Home</Link>
             <Link to="/blog" className="block navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
-            </Link>
-            <Link to="/quran-resources" className="block navbar-link flex items-center">
-              <BookOpen size={16} className="mr-1" /> Quran & Resources
             </Link>
             <Link to="/about" className="block navbar-link">About Us</Link>
             <Link to="/prayer-times" className="block navbar-link">Prayer Times</Link>
