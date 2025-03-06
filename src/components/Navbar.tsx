@@ -25,12 +25,12 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="navbar-link">Home</Link>
+            <Link to="/prayer-times" className="navbar-link">Prayer Times</Link>
+            <Link to="/events" className="navbar-link">Events</Link>
             <Link to="/blog" className="navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
             </Link>
             <Link to="/about" className="navbar-link">About Us</Link>
-            <Link to="/prayer-times" className="navbar-link">Prayer Times</Link>
-            <Link to="/events" className="navbar-link">Events</Link>
             <Link to="/contact" className="navbar-link">Contact</Link>
             <Button className="cta-button ml-4">Donate</Button>
           </div>
@@ -52,12 +52,12 @@ const Navbar = () => {
         <div className="md:hidden bg-white">
           <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
             <Link to="/" className="block navbar-link">Home</Link>
+            <Link to="/prayer-times" className="block navbar-link">Prayer Times</Link>
+            <Link to="/events" className="block navbar-link">Events</Link>
             <Link to="/blog" className="block navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
             </Link>
             <Link to="/about" className="block navbar-link">About Us</Link>
-            <Link to="/prayer-times" className="block navbar-link">Prayer Times</Link>
-            <Link to="/events" className="block navbar-link">Events</Link>
             <Link to="/contact" className="block navbar-link">Contact</Link>
             <Button className="cta-button w-full mt-4">Donate</Button>
           </div>
