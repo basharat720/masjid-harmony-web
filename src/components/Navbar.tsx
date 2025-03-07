@@ -1,14 +1,30 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, FileText, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    setIsMenuOpen(false);
+    
+    // If we're on the home page, scroll to the section
+    if (location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // If we're not on the home page, navigate to home page with section hash
+      window.location.href = `/#${sectionId}`;
+    }
   };
 
   return (
@@ -24,15 +40,15 @@ const Navbar = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className="navbar-link">Home</Link>
-            <Link to="/prayer-times" className="navbar-link">Prayer Times</Link>
-            <Link to="/events" className="navbar-link">Events</Link>
-            <Link to="/blog" className="navbar-link flex items-center">
+            <button onClick={() => scrollToSection('home')} className="navbar-link">Home</button>
+            <button onClick={() => scrollToSection('prayer-times')} className="navbar-link">Prayer Times</button>
+            <button onClick={() => scrollToSection('events')} className="navbar-link">Events</button>
+            <button onClick={() => scrollToSection('blog')} className="navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
-            </Link>
-            <Link to="/about" className="navbar-link">About Us</Link>
-            <Link to="/contact" className="navbar-link">Contact</Link>
-            <Button className="cta-button ml-4">Donate</Button>
+            </button>
+            <button onClick={() => scrollToSection('about')} className="navbar-link">About Us</button>
+            <button onClick={() => scrollToSection('contact')} className="navbar-link">Contact</button>
+            <button onClick={() => scrollToSection('donate')} className="cta-button ml-4">Donate</button>
           </div>
           
           {/* Mobile Navigation Toggle */}
@@ -51,15 +67,15 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white">
           <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-            <Link to="/" className="block navbar-link">Home</Link>
-            <Link to="/prayer-times" className="block navbar-link">Prayer Times</Link>
-            <Link to="/events" className="block navbar-link">Events</Link>
-            <Link to="/blog" className="block navbar-link flex items-center">
+            <button onClick={() => scrollToSection('home')} className="block navbar-link w-full text-left">Home</button>
+            <button onClick={() => scrollToSection('prayer-times')} className="block navbar-link w-full text-left">Prayer Times</button>
+            <button onClick={() => scrollToSection('events')} className="block navbar-link w-full text-left">Events</button>
+            <button onClick={() => scrollToSection('blog')} className="block navbar-link flex items-center w-full text-left">
               <FileText size={16} className="mr-1" /> Blog
-            </Link>
-            <Link to="/about" className="block navbar-link">About Us</Link>
-            <Link to="/contact" className="block navbar-link">Contact</Link>
-            <Button className="cta-button w-full mt-4">Donate</Button>
+            </button>
+            <button onClick={() => scrollToSection('about')} className="block navbar-link w-full text-left">About Us</button>
+            <button onClick={() => scrollToSection('contact')} className="block navbar-link w-full text-left">Contact</button>
+            <button onClick={() => scrollToSection('donate')} className="cta-button w-full mt-4">Donate</button>
           </div>
         </div>
       )}
