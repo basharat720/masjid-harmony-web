@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, FileText, Settings } from 'lucide-react';
+import { Menu, X, FileText, Settings, Image } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -43,6 +43,9 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('home')} className="navbar-link">Home</button>
             <button onClick={() => scrollToSection('prayer-times')} className="navbar-link">Prayer Times</button>
             <button onClick={() => scrollToSection('events')} className="navbar-link">Events</button>
+            <button onClick={() => scrollToSection('gallery')} className="navbar-link flex items-center">
+              <Image size={16} className="mr-1" /> Gallery
+            </button>
             <button onClick={() => scrollToSection('blog')} className="navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
             </button>
@@ -70,6 +73,9 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('home')} className="block navbar-link w-full text-left">Home</button>
             <button onClick={() => scrollToSection('prayer-times')} className="block navbar-link w-full text-left">Prayer Times</button>
             <button onClick={() => scrollToSection('events')} className="block navbar-link w-full text-left">Events</button>
+            <button onClick={() => scrollToSection('gallery')} className="block navbar-link flex items-center w-full text-left">
+              <Image size={16} className="mr-1" /> Gallery
+            </button>
             <button onClick={() => scrollToSection('blog')} className="block navbar-link flex items-center w-full text-left">
               <FileText size={16} className="mr-1" /> Blog
             </button>

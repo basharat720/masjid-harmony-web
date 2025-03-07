@@ -9,6 +9,7 @@ import Donation from '../components/Donation';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import BlogPosts from '../components/BlogPosts';
+import Gallery from '../components/Gallery';
 
 const Index = () => {
   return (
@@ -23,6 +24,9 @@ const Index = () => {
         </section>
         <section id="events">
           <Events />
+        </section>
+        <section id="gallery">
+          <Gallery />
         </section>
         <section id="blog">
           <BlogPosts />
