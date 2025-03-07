@@ -3,7 +3,6 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import PrayerTimes from '../components/PrayerTimes';
-import About from '../components/About';
 import Events from '../components/Events';
 import Donation from '../components/Donation';
 import Contact from '../components/Contact';
@@ -30,9 +29,6 @@ const Index = () => {
         </section>
         <section id="blog">
           <BlogPosts />
-        </section>
-        <section id="about">
-          <About />
         </section>
         <section id="contact">
           <Contact />

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, FileText, Settings, Image } from 'lucide-react';
+import { Menu, X, FileText, Image, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -49,9 +49,9 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('blog')} className="navbar-link flex items-center">
               <FileText size={16} className="mr-1" /> Blog
             </button>
-            <button onClick={() => scrollToSection('about')} className="navbar-link">About Us</button>
             <button onClick={() => scrollToSection('contact')} className="navbar-link">Contact</button>
             <button onClick={() => scrollToSection('donate')} className="cta-button ml-4">Donate</button>
+            <Link to="/admin-login" className="navbar-link">Admin</Link>
           </div>
           
           {/* Mobile Navigation Toggle */}
@@ -79,9 +79,9 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('blog')} className="block navbar-link flex items-center w-full text-left">
               <FileText size={16} className="mr-1" /> Blog
             </button>
-            <button onClick={() => scrollToSection('about')} className="block navbar-link w-full text-left">About Us</button>
             <button onClick={() => scrollToSection('contact')} className="block navbar-link w-full text-left">Contact</button>
             <button onClick={() => scrollToSection('donate')} className="cta-button w-full mt-4">Donate</button>
+            <Link to="/admin-login" className="block navbar-link w-full text-left mt-4">Admin</Link>
           </div>
         </div>
       )}
