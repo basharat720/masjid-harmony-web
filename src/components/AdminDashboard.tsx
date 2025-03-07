@@ -7,18 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { LayoutDashboard, Users, FileText, BookOpen, Calendar, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+  const currentUser = authService.getCurrentUser();
   
   const handleLogout = () => {
-    localStorage.removeItem('isAdmin');
-    window.location.href = '/';
+    authService.logout();
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
+    navigate('/');
   };
   
   // Mock stats for the dashboard
@@ -36,6 +40,12 @@ const AdminDashboard = () => {
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <p className="text-masjid-cream/80 text-sm mt-1">Masjid Imam Hussain</p>
+          {currentUser && (
+            <div className="mt-2 p-2 bg-white/10 rounded-md">
+              <p className="text-sm font-medium">Welcome, {currentUser.username}</p>
+              <p className="text-xs opacity-70">{currentUser.role}</p>
+            </div>
+          )}
         </div>
         
         <nav className="space-y-2">
