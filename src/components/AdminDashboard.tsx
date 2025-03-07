@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,15 +6,88 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, Users, FileText, BookOpen, Calendar, Settings, LogOut } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { 
+  LayoutDashboard, 
+  Users, 
+  FileText, 
+  BookOpen, 
+  Calendar, 
+  Settings, 
+  LogOut,
+  Menu,
+  X,
+  Save,
+  AlertTriangle,
+  CheckCircle,
+  Trash2,
+  Edit,
+  Plus
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+
+// Create a Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qhrnrieztlirempiesok.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocm5yaWV6dGxpcmVtcGllc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAxNTYwNzgsImV4cCI6MjAyNTczMjA3OH0.6Lg7cj9B0YhNQnRnZXGxDRIXiiYR6Igb-wkphqD8Y7o';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const currentUser = authService.getCurrentUser();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // State for data
+  const [prayerTimes, setPrayerTimes] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [events, setEvents] = useState([]);
+  
+  // Fetch data on load
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch prayer times
+        const { data: prayerTimesData, error: prayerTimesError } = await supabase
+          .from('prayer_times')
+          .select('*')
+          .order('id');
+          
+        if (prayerTimesError) throw prayerTimesError;
+        if (prayerTimesData) setPrayerTimes(prayerTimesData);
+        
+        // Fetch blog posts
+        const { data: blogPostsData, error: blogPostsError } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .order('date', { ascending: false });
+          
+        if (blogPostsError) throw blogPostsError;
+        if (blogPostsData) setBlogPosts(blogPostsData);
+        
+        // Fetch events
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .order('date');
+          
+        if (eventsError) throw eventsError;
+        if (eventsData) setEvents(eventsData);
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load data. Please try refreshing the page.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    fetchData();
+  }, [toast]);
   
   const handleLogout = () => {
     authService.logout();
@@ -25,17 +98,82 @@ const AdminDashboard = () => {
     navigate('/');
   };
   
-  // Mock stats for the dashboard
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  
+  // Handle prayer time update
+  const handlePrayerTimesUpdate = async () => {
+    setIsLoading(true);
+    
+    try {
+      // For each prayer, update both adhan and iqamah times
+      for (const prayer of prayerTimes) {
+        const { error } = await supabase
+          .from('prayer_times')
+          .update({
+            adhan_time: prayer.adhan_time,
+            iqamah_time: prayer.iqamah_time,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', prayer.id);
+          
+        if (error) throw error;
+      }
+      
+      toast({
+        title: "Prayer Times Updated",
+        description: "Prayer times have been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error updating prayer times:', error);
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating prayer times. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handlePrayerTimeChange = (index, field, value) => {
+    const updatedPrayerTimes = [...prayerTimes];
+    updatedPrayerTimes[index][field] = value;
+    setPrayerTimes(updatedPrayerTimes);
+  };
+  
+  // Stats for the dashboard
   const stats = [
-    { title: "Total Members", value: "345", icon: <Users size={24} className="text-masjid-gold" /> },
-    { title: "Weekly Attendance", value: "120", icon: <Users size={24} className="text-masjid-primary" /> },
-    { title: "Prayer Times Updated", value: "Today", icon: <Calendar size={24} className="text-masjid-gold" /> },
-    { title: "Blog Posts", value: "24", icon: <FileText size={24} className="text-masjid-primary" /> }
+    { 
+      title: "Total Members", 
+      value: "345", 
+      icon: <Users size={24} className="text-masjid-gold" />,
+      description: "Registered community members"
+    },
+    { 
+      title: "Weekly Attendance", 
+      value: "120", 
+      icon: <Users size={24} className="text-masjid-primary" />,
+      description: "Average weekly prayer attendance"
+    },
+    { 
+      title: "Prayer Times Updated", 
+      value: "Today", 
+      icon: <Calendar size={24} className="text-masjid-gold" />,
+      description: "Last update of prayer schedule"
+    },
+    { 
+      title: "Blog Posts", 
+      value: blogPosts.length.toString(), 
+      icon: <FileText size={24} className="text-masjid-primary" />,
+      description: "Published articles and news"
+    }
   ];
   
   return (
     <div className="flex min-h-screen bg-masjid-light">
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <div className="w-64 bg-masjid-primary text-white min-h-screen p-4 hidden md:block">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
@@ -109,57 +247,105 @@ const AdminDashboard = () => {
         </nav>
       </div>
       
-      {/* Mobile navigation */}
-      <div className="md:hidden w-full bg-masjid-primary text-white p-4">
+      {/* Mobile navigation header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-masjid-primary text-white p-4 shadow-md">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          <Button 
-            variant="ghost" 
-            className="text-white hover:bg-white/10"
-            onClick={handleLogout}
-          >
-            <LogOut size={20} />
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-white hover:bg-white/10"
+              onClick={handleLogout}
+            >
+              <LogOut size={20} />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-white hover:bg-white/10"
+              onClick={toggleMobileMenu}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </Button>
+          </div>
         </div>
         
-        <div className="mt-4 flex overflow-x-auto space-x-2 pb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={activeTab === "dashboard" ? "bg-white/10" : "hover:bg-white/5"}
-            onClick={() => setActiveTab("dashboard")}
-          >
-            <LayoutDashboard size={16} className="mr-1" /> Dashboard
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={activeTab === "prayer-times" ? "bg-white/10" : "hover:bg-white/5"}
-            onClick={() => setActiveTab("prayer-times")}
-          >
-            <Calendar size={16} className="mr-1" /> Prayer Times
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={activeTab === "blog" ? "bg-white/10" : "hover:bg-white/5"}
-            onClick={() => setActiveTab("blog")}
-          >
-            <FileText size={16} className="mr-1" /> Blog
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={activeTab === "quran" ? "bg-white/10" : "hover:bg-white/5"}
-            onClick={() => setActiveTab("quran")}
-          >
-            <BookOpen size={16} className="mr-1" /> Resources
-          </Button>
-        </div>
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="mt-4 pt-4 border-t border-white/10 animate-in slide-in-from-top duration-300">
+            <nav className="space-y-1">
+              <button 
+                onClick={() => {
+                  setActiveTab("dashboard");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "dashboard" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <LayoutDashboard size={20} />
+                <span>Dashboard</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("prayer-times");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "prayer-times" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <Calendar size={20} />
+                <span>Prayer Times</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("blog");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "blog" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <FileText size={20} />
+                <span>Blog Posts</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("quran");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "quran" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <BookOpen size={20} />
+                <span>Quran & Resources</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("settings");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "settings" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <Settings size={20} />
+                <span>Settings</span>
+              </button>
+            </nav>
+          </div>
+        )}
       </div>
       
       {/* Main content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 md:p-8 mt-16 md:mt-0">
         {/* Dashboard */}
         {activeTab === "dashboard" && (
           <div>
@@ -167,12 +353,13 @@ const AdminDashboard = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {stats.map((stat, index) => (
-                <Card key={index}>
+                <Card key={index} className="transition-all hover:shadow-md">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-masjid-navy/70">{stat.title}</p>
                         <p className="text-3xl font-bold text-masjid-navy mt-1">{stat.value}</p>
+                        <p className="text-xs text-masjid-navy/60 mt-1">{stat.description}</p>
                       </div>
                       <div className="bg-masjid-cream/50 p-3 rounded-full">
                         {stat.icon}
@@ -184,9 +371,12 @@ const AdminDashboard = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="transition-all hover:shadow-md">
                 <CardHeader>
-                  <CardTitle>Recent Activities</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <FileText size={18} className="mr-2 text-masjid-primary" />
+                    Recent Activities
+                  </CardTitle>
                   <CardDescription>Latest updates from the masjid</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -207,9 +397,12 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="transition-all hover:shadow-md">
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <CheckCircle size={18} className="mr-2 text-masjid-primary" />
+                    Quick Actions
+                  </CardTitle>
                   <CardDescription>Common tasks you may want to perform</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -251,40 +444,42 @@ const AdminDashboard = () => {
           <div>
             <h2 className="text-2xl font-bold text-masjid-primary mb-6">Prayer Times Management</h2>
             
-            <Card className="mb-8">
+            <Card className="mb-8 transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle>Update Prayer Times</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Calendar size={18} className="mr-2 text-masjid-primary" />
+                  Update Prayer Times
+                </CardTitle>
                 <CardDescription>
                   These times will be displayed on the website. You can manually adjust them or use calculation methods.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].map((prayer) => (
-                    <div key={prayer} className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
+                  {prayerTimes.map((prayer, index) => (
+                    <div key={prayer.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
                       <div>
-                        <Label className="text-lg">{prayer}</Label>
+                        <Label className="text-lg flex items-center">
+                          {prayer.name}
+                          <span className="text-sm text-masjid-navy/60 ml-2">({prayer.arabic_name})</span>
+                        </Label>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`${prayer.toLowerCase()}-adhan`}>Adhan Time</Label>
+                        <Label htmlFor={`${prayer.name.toLowerCase()}-adhan`}>Adhan Time</Label>
                         <Input 
-                          id={`${prayer.toLowerCase()}-adhan`} 
+                          id={`${prayer.name.toLowerCase()}-adhan`} 
                           type="time" 
-                          defaultValue={prayer === "Fajr" ? "05:20" : 
-                                      prayer === "Dhuhr" ? "13:05" : 
-                                      prayer === "Asr" ? "16:35" : 
-                                      prayer === "Maghrib" ? "19:05" : "20:20"} 
+                          value={prayer.adhan_time} 
+                          onChange={(e) => handlePrayerTimeChange(index, 'adhan_time', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`${prayer.toLowerCase()}-iqamah`}>Iqamah Time</Label>
+                        <Label htmlFor={`${prayer.name.toLowerCase()}-iqamah`}>Iqamah Time</Label>
                         <Input 
-                          id={`${prayer.toLowerCase()}-iqamah`} 
+                          id={`${prayer.name.toLowerCase()}-iqamah`} 
                           type="time" 
-                          defaultValue={prayer === "Fajr" ? "05:40" : 
-                                      prayer === "Dhuhr" ? "13:25" : 
-                                      prayer === "Asr" ? "16:55" : 
-                                      prayer === "Maghrib" ? "19:15" : "20:40"} 
+                          value={prayer.iqamah_time}
+                          onChange={(e) => handlePrayerTimeChange(index, 'iqamah_time', e.target.value)}
                         />
                       </div>
                     </div>
@@ -292,20 +487,32 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button onClick={() => {
-                  toast({
-                    title: "Prayer times updated",
-                    description: "The prayer times have been successfully updated.",
-                  });
-                }}>
-                  Save Changes
+                <Button 
+                  onClick={handlePrayerTimesUpdate}
+                  disabled={isLoading}
+                  className="flex items-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle>Calculation Method</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Settings size={18} className="mr-2 text-masjid-primary" />
+                  Calculation Method
+                </CardTitle>
                 <CardDescription>
                   Choose a method to automatically calculate prayer times based on your masjid's location.
                 </CardDescription>
@@ -349,6 +556,7 @@ const AdminDashboard = () => {
                     description: "Prayer times calculations have been updated.",
                   });
                 }}>
+                  <Save className="mr-2 h-4 w-4" />
                   Apply Changes
                 </Button>
               </CardFooter>
@@ -361,9 +569,12 @@ const AdminDashboard = () => {
           <div>
             <h2 className="text-2xl font-bold text-masjid-primary mb-6">Blog Posts Management</h2>
             
-            <Card className="mb-8">
+            <Card className="mb-8 transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle>Create New Blog Post</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Plus size={18} className="mr-2 text-masjid-primary" />
+                  Create New Blog Post
+                </CardTitle>
                 <CardDescription>
                   Add a new article to the masjid blog
                 </CardDescription>
@@ -416,33 +627,41 @@ const AdminDashboard = () => {
                     description: "Your blog post has been successfully created.",
                   });
                 }}>
+                  <Plus className="mr-2 h-4 w-4" />
                   Publish Post
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="transition-all hover:shadow-md">
               <CardHeader>
-                <CardTitle>Manage Existing Posts</CardTitle>
+                <CardTitle className="flex items-center">
+                  <FileText size={18} className="mr-2 text-masjid-primary" />
+                  Manage Existing Posts
+                </CardTitle>
                 <CardDescription>
                   Edit or delete existing blog posts
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {["Eid Al-Fitr Celebration Highlights", "Understanding the Five Pillars of Islam", "Ramadan Preparations: A Practical Guide", "Youth Program Launch: Nurturing Future Leaders"].map((title, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 border rounded-md">
+                  {blogPosts.map((post, index) => (
+                    <div key={post.id} className="flex flex-col md:flex-row md:justify-between md:items-center p-3 border rounded-md space-y-2 md:space-y-0">
                       <div>
-                        <p className="font-medium">{title}</p>
+                        <p className="font-medium">{post.title}</p>
                         <p className="text-sm text-masjid-navy/70">
-                          {index === 0 ? "2023-04-22" : 
-                           index === 1 ? "2023-03-15" : 
-                           index === 2 ? "2023-02-20" : "2023-01-10"}
+                          {new Date(post.date).toLocaleDateString()} • {post.category}
                         </p>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
+                        <Button variant="outline" size="sm" className="flex items-center">
+                          <Edit className="mr-1 h-3 w-3" />
+                          Edit
+                        </Button>
+                        <Button variant="destructive" size="sm" className="flex items-center">
+                          <Trash2 className="mr-1 h-3 w-3" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -454,6 +673,7 @@ const AdminDashboard = () => {
         
         {/* Quran & Resources Management */}
         {activeTab === "quran" && (
+          
           <div>
             <h2 className="text-2xl font-bold text-masjid-primary mb-6">Quran & Resources Management</h2>
             
@@ -500,6 +720,7 @@ const AdminDashboard = () => {
                         description: "The Quran recitation has been added successfully.",
                       });
                     }}>
+                      <Plus className="mr-2 h-4 w-4" />
                       Add Recitation
                     </Button>
                   </CardFooter>
@@ -557,6 +778,7 @@ const AdminDashboard = () => {
                         description: "The resource has been added successfully.",
                       });
                     }}>
+                      <Plus className="mr-2 h-4 w-4" />
                       Add Resource
                     </Button>
                   </CardFooter>
@@ -593,140 +815,4 @@ const AdminDashboard = () => {
                       
                       <div className="space-y-2">
                         <Label htmlFor="video-url">Video URL</Label>
-                        <Input id="video-url" placeholder="e.g., YouTube link" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="thumbnail">Thumbnail Image</Label>
-                        <Input id="thumbnail" type="file" accept="image/*" />
-                      </div>
-                    </form>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => {
-                      toast({
-                        title: "Lecture added",
-                        description: "The lecture has been added successfully.",
-                      });
-                    }}>
-                      Add Lecture
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-        
-        {/* Settings */}
-        {activeTab === "settings" && (
-          <div>
-            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Admin Settings</h2>
-            
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="admin-username">Username</Label>
-                      <Input id="admin-username" defaultValue="admin" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="admin-email">Email</Label>
-                      <Input id="admin-email" type="email" defaultValue="admin@masjidhussain.org" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input id="current-password" type="password" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">New Password</Label>
-                      <Input id="new-password" type="password" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirm New Password</Label>
-                      <Input id="confirm-password" type="password" />
-                    </div>
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => {
-                  toast({
-                    title: "Settings updated",
-                    description: "Your account settings have been updated successfully.",
-                  });
-                }}>
-                  Update Account
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Website Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="masjid-name">Masjid Name</Label>
-                    <Input id="masjid-name" defaultValue="Masjid Imam Hussain" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-email">Contact Email</Label>
-                      <Input id="contact-email" type="email" defaultValue="info@masjidhussain.org" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-phone">Contact Phone</Label>
-                      <Input id="contact-phone" defaultValue="+1 (123) 456-7890" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="masjid-address">Masjid Address</Label>
-                    <Textarea id="masjid-address" defaultValue="123 Islamic Center Dr, Los Angeles, CA 90001" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="about-description">About Description</Label>
-                    <Textarea 
-                      id="about-description" 
-                      className="min-h-[100px]"
-                      defaultValue="Masjid Imam Hussain is a vibrant Islamic center dedicated to serving the Muslim community through prayer, education, and community service."
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="logo">Masjid Logo</Label>
-                    <Input id="logo" type="file" accept="image/*" />
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => {
-                  toast({
-                    title: "Website settings updated",
-                    description: "The website settings have been updated successfully.",
-                  });
-                }}>
-                  Save Changes
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default AdminDashboard;
+                        <Input id="video-url" placeholder="e.

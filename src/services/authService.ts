@@ -1,4 +1,11 @@
 
+import { createClient } from '@supabase/supabase-js';
+
+// Create a Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qhrnrieztlirempiesok.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocm5yaWV6dGxpcmVtcGllc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAxNTYwNzgsImV4cCI6MjAyNTczMjA3OH0.6Lg7cj9B0YhNQnRnZXGxDRIXiiYR6Igb-wkphqD8Y7o';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 interface AuthUser {
   id: string;
   username: string;
@@ -6,23 +13,40 @@ interface AuthUser {
   role: string;
 }
 
-// Mock database of users - in a real app, this would be in a secure database
-const users = [
-  {
-    id: "1",
-    username: "admin",
-    email: "admin@masjidhussain.org",
-    password: "Admin@123", // In a real app, this would be hashed
-    role: "admin"
-  },
-  {
-    id: "2",
-    username: "imam",
-    email: "imam@masjidhussain.org",
-    password: "Imam@123", // In a real app, this would be hashed
-    role: "editor"
+// Get admin user from database
+const loginWithSupabase = async (username: string, password: string): Promise<AuthUser> => {
+  try {
+    // Query the admin_users table
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .or(`username.eq.${username},email.eq.${username}`)
+      .eq('password', password)
+      .single();
+    
+    if (error) throw error;
+    
+    if (data) {
+      // Create auth user
+      const authUser: AuthUser = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        role: data.role
+      };
+      
+      // Store in sessionStorage
+      sessionStorage.setItem('currentUser', JSON.stringify(authUser));
+      
+      return authUser;
+    } else {
+      throw new Error('Invalid credentials');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    throw new Error('Invalid credentials');
   }
-];
+};
 
 // Store the current user in sessionStorage to persist through page refreshes
 // but clear when the browser is closed
@@ -38,33 +62,53 @@ const getCurrentUser = (): AuthUser | null => {
   }
 };
 
-const login = (username: string, password: string): Promise<AuthUser> => {
-  // Simulate API call delay
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Find the user
-      const user = users.find(
-        u => (u.username === username || u.email === username) && u.password === password
-      );
-      
-      if (user) {
-        // Create a user object without the password
-        const authUser: AuthUser = {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        };
-        
-        // Store in sessionStorage
-        sessionStorage.setItem('currentUser', JSON.stringify(authUser));
-        
-        resolve(authUser);
-      } else {
-        reject(new Error('Invalid credentials'));
+const login = async (username: string, password: string): Promise<AuthUser> => {
+  try {
+    // First try to login with Supabase
+    return await loginWithSupabase(username, password);
+  } catch (error) {
+    console.log('Fallback to mock login due to:', error);
+    
+    // Fallback to mock users if Supabase fails
+    // Find the user
+    const mockUsers = [
+      {
+        id: "1",
+        username: "admin",
+        email: "admin@masjidhussain.org",
+        password: "Admin@123",
+        role: "admin"
+      },
+      {
+        id: "2",
+        username: "imam",
+        email: "imam@masjidhussain.org",
+        password: "Imam@123",
+        role: "editor"
       }
-    }, 800); // Simulate network delay
-  });
+    ];
+    
+    const user = mockUsers.find(
+      u => (u.username === username || u.email === username) && u.password === password
+    );
+    
+    if (user) {
+      // Create a user object without the password
+      const authUser: AuthUser = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      };
+      
+      // Store in sessionStorage
+      sessionStorage.setItem('currentUser', JSON.stringify(authUser));
+      
+      return authUser;
+    } else {
+      throw new Error('Invalid credentials');
+    }
+  }
 };
 
 const logout = (): void => {

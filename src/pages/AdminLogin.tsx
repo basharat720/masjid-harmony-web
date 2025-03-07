@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from '../services/authService';
-import { LockKeyhole, UserCircle2 } from 'lucide-react';
+import { LockKeyhole, UserCircle2, Loader2 } from 'lucide-react';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
@@ -30,7 +30,7 @@ const AdminLogin = () => {
     
     if (!username || !password) {
       toast({
-        title: "Error",
+        title: "Input Error",
         description: "Please enter both username and password.",
         variant: "destructive",
       });
@@ -43,12 +43,13 @@ const AdminLogin = () => {
       await authService.login(username, password);
       
       toast({
-        title: "Success",
-        description: "You have successfully logged in as admin.",
+        title: "Login Successful",
+        description: "Welcome to the Masjid Imam Hussain admin panel.",
       });
       
       navigate('/admin');
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Authentication Failed",
         description: "Invalid username or password. Please try again.",
@@ -109,7 +110,12 @@ const AdminLogin = () => {
                   className="w-full bg-masjid-primary hover:bg-masjid-primary/90"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : "Sign In"}
                 </Button>
               </div>
               
