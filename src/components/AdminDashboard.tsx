@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,8 @@ import {
   CheckCircle,
   Trash2,
   Edit,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -49,6 +51,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         // Fetch prayer times
         const { data: prayerTimesData, error: prayerTimesError } = await supabase
           .from('prayer_times')
@@ -83,6 +86,8 @@ const AdminDashboard = () => {
           description: "Failed to load data. Please try refreshing the page.",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -346,6 +351,15 @@ const AdminDashboard = () => {
       
       {/* Main content */}
       <div className="flex-1 p-8 md:p-8 mt-16 md:mt-0">
+        {isLoading && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+              <Loader2 className="h-10 w-10 text-masjid-primary animate-spin mb-4" />
+              <p className="text-masjid-navy font-medium">Loading data...</p>
+            </div>
+          </div>
+        )}
+        
         {/* Dashboard */}
         {activeTab === "dashboard" && (
           <div>
@@ -673,7 +687,6 @@ const AdminDashboard = () => {
         
         {/* Quran & Resources Management */}
         {activeTab === "quran" && (
-          
           <div>
             <h2 className="text-2xl font-bold text-masjid-primary mb-6">Quran & Resources Management</h2>
             
@@ -815,4 +828,94 @@ const AdminDashboard = () => {
                       
                       <div className="space-y-2">
                         <Label htmlFor="video-url">Video URL</Label>
-                        <Input id="video-url" placeholder="e.
+                        <Input id="video-url" placeholder="e.g., https://youtube.com/watch?v=..." />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="lecture-thumbnail">Thumbnail</Label>
+                        <Input id="lecture-thumbnail" type="file" accept="image/*" />
+                      </div>
+                    </form>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => {
+                      toast({
+                        title: "Lecture added",
+                        description: "The lecture has been added successfully.",
+                      });
+                    }}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Lecture
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div>
+            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Admin Settings</h2>
+            
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings size={18} className="mr-2 text-masjid-primary" />
+                  Account Settings
+                </CardTitle>
+                <CardDescription>
+                  Update your admin account information
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input id="username" defaultValue={currentUser?.username} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" defaultValue={currentUser?.email} />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <Input id="current-password" type="password" placeholder="Enter current password" />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input id="new-password" type="password" placeholder="Enter new password" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm New Password</Label>
+                      <Input id="confirm-password" type="password" placeholder="Confirm new password" />
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => {
+                  toast({
+                    title: "Settings updated",
+                    description: "Your account settings have been saved.",
+                  });
+                }}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Settings
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
