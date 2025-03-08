@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 type PrayerTime = {
   name: string;
@@ -10,106 +11,89 @@ type PrayerTime = {
   arabicName: string;
 };
 
-type Coordinates = {
-  latitude: number;
-  longitude: number;
-};
-
-const calculatePrayerTimes = (coords: Coordinates): PrayerTime[] => {
-  // This is a placeholder for an actual calculation
-  // In a real application, you would use a library like adhan-js
-  // or make an API call to a prayer time service
-  
-  // For now, we'll return mock data that shifts slightly based on location
-  const minuteOffset = Math.floor((coords.latitude + coords.longitude) % 30);
-  
-  return [
-    { 
-      name: 'Fajr', 
-      time: `${5 + Math.floor(minuteOffset/15)}:${30 + (minuteOffset % 15)} AM`, 
-      adhan: `${5 + Math.floor(minuteOffset/15)}:${20 + (minuteOffset % 15)} AM`, 
-      iqamah: `${5 + Math.floor(minuteOffset/15)}:${40 + (minuteOffset % 15)} AM`, 
-      arabicName: 'الفجر' 
-    },
-    { 
-      name: 'Dhuhr', 
-      time: `${1 + Math.floor(minuteOffset/20)}:${15 + (minuteOffset % 10)} PM`, 
-      adhan: `${1 + Math.floor(minuteOffset/20)}:${5 + (minuteOffset % 10)} PM`, 
-      iqamah: `${1 + Math.floor(minuteOffset/20)}:${25 + (minuteOffset % 10)} PM`, 
-      arabicName: 'الظهر' 
-    },
-    { 
-      name: 'Asr', 
-      time: `${4 + Math.floor(minuteOffset/30)}:${45 + (minuteOffset % 5)} PM`, 
-      adhan: `${4 + Math.floor(minuteOffset/30)}:${35 + (minuteOffset % 5)} PM`, 
-      iqamah: `${4 + Math.floor(minuteOffset/30)}:${55 + (minuteOffset % 5)} PM`, 
-      arabicName: 'العصر' 
-    },
-    { 
-      name: 'Maghrib', 
-      time: `${7 + Math.floor(minuteOffset/40)}:${5 + (minuteOffset % 10)} PM`, 
-      adhan: `${7 + Math.floor(minuteOffset/40)}:${5 + (minuteOffset % 10)} PM`, 
-      iqamah: `${7 + Math.floor(minuteOffset/40)}:${15 + (minuteOffset % 5)} PM`, 
-      arabicName: 'المغرب' 
-    },
-    { 
-      name: 'Isha', 
-      time: `${8 + Math.floor(minuteOffset/30)}:${30 + (minuteOffset % 10)} PM`, 
-      adhan: `${8 + Math.floor(minuteOffset/30)}:${20 + (minuteOffset % 10)} PM`, 
-      iqamah: `${8 + Math.floor(minuteOffset/30)}:${40 + (minuteOffset % 5)} PM`, 
-      arabicName: 'العشاء' 
-    },
-  ];
-};
-
 export const usePrayerTimes = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
-  const [location, setLocation] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const getLocation = () => {
-      if (navigator.geolocation) {
+    const fetchPrayerTimes = async () => {
+      try {
         setLoading(true);
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            });
-            setLoading(false);
-          },
-          (err) => {
-            console.error("Error getting location:", err);
-            toast({
-              title: "Location Error",
-              description: "Could not get your location. Using default prayer times.",
-              variant: "destructive",
-            });
-            // Fall back to default coordinates (e.g., Mecca)
-            setLocation({ latitude: 21.4225, longitude: 39.8262 });
-            setLoading(false);
-          }
-        );
-      } else {
-        setError("Geolocation is not supported by this browser.");
-        // Fall back to default coordinates
-        setLocation({ latitude: 21.4225, longitude: 39.8262 });
+        
+        // Try to fetch from Supabase first
+        const { data, error } = await supabase
+          .from('prayer_times')
+          .select('*')
+          .order('id');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Format the data from Supabase
+          const formattedTimes = data.map(prayer => ({
+            name: prayer.name,
+            arabicName: prayer.arabic_name,
+            time: formatTimeString(prayer.adhan_time),
+            adhan: formatTimeString(prayer.adhan_time),
+            iqamah: formatTimeString(prayer.iqamah_time)
+          }));
+          
+          setPrayerTimes(formattedTimes);
+        } else {
+          // Fallback to default times if no data in Supabase
+          setPrayerTimes([
+            { name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر' },
+            { name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر' },
+            { name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر' },
+            { name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب' },
+            { name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء' },
+          ]);
+        }
+      } catch (err) {
+        console.error("Error fetching prayer times:", err);
+        setError("Could not load prayer times. Using default times.");
+        
+        // Set default prayer times as fallback
+        setPrayerTimes([
+          { name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر' },
+          { name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر' },
+          { name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر' },
+          { name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب' },
+          { name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء' },
+        ]);
+      } finally {
         setLoading(false);
       }
     };
 
-    getLocation();
-  }, [toast]);
+    fetchPrayerTimes();
+  }, []);
 
-  useEffect(() => {
-    if (location) {
-      const times = calculatePrayerTimes(location);
-      setPrayerTimes(times);
+  // Helper function to format time strings
+  const formatTimeString = (timeStr: string) => {
+    if (!timeStr) return "N/A";
+    
+    try {
+      // If it's already in AM/PM format, return as is
+      if (timeStr.includes('AM') || timeStr.includes('PM')) {
+        return timeStr;
+      }
+      
+      // Parse time string (expected format from DB: "HH:MM:SS")
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      
+      // Convert to 12-hour format
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeStr;
     }
-  }, [location]);
+  };
 
-  return { prayerTimes, loading, error, location };
+  return { prayerTimes, loading, error };
 };

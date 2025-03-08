@@ -13,6 +13,8 @@ import {
 import { 
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
   DialogTrigger
 } from "@/components/ui/dialog";
 import { 
@@ -102,7 +104,7 @@ const galleryFolders: GalleryFolder[] = [
 
 // Extended gallery images with folder assignments
 const galleryImages: GalleryImage[] = [
-  // Masjid Exterior folder
+  // Masjid Exterior folder - Adding more images
   {
     id: "img1",
     src: "https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=600&h=400",
@@ -121,6 +123,27 @@ const galleryImages: GalleryImage[] = [
     id: "img8",
     src: "https://images.unsplash.com/photo-1564492466532-6ab912269193?auto=format&fit=crop&w=600&h=400",
     alt: "Minaret at sunset",
+    category: "masjid",
+    folder: "folder1"
+  },
+  {
+    id: "img28",
+    src: "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=600&h=400",
+    alt: "Masjid dome",
+    category: "masjid",
+    folder: "folder1"
+  },
+  {
+    id: "img29",
+    src: "https://images.unsplash.com/photo-1527875393219-e92d7061f553?auto=format&fit=crop&w=600&h=400",
+    alt: "Masjid entrance",
+    category: "masjid",
+    folder: "folder1"
+  },
+  {
+    id: "img30",
+    src: "https://images.unsplash.com/photo-1585036156250-91201152ffc8?auto=format&fit=crop&w=600&h=400",
+    alt: "Mosque courtyard",
     category: "masjid",
     folder: "folder1"
   },
@@ -376,6 +399,8 @@ const Gallery = () => {
           <span className="hidden">Open Image</span>
         </DialogTrigger>
         <DialogContent className="max-w-4xl p-1 bg-transparent border-none">
+          <DialogTitle className="sr-only">Image Preview</DialogTitle>
+          <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
           {selectedImage && (
             <img 
               src={selectedImage.src.replace('w=600&h=400', 'w=1200&h=800')} 
@@ -453,6 +478,8 @@ const GalleryCard = ({
         </Card>
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-1 bg-transparent border-none">
+        <DialogTitle className="sr-only">Image Preview</DialogTitle>
+        <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
         <img 
           src={image.src.replace('w=600&h=400', 'w=1200&h=800')} 
           alt={image.alt} 
