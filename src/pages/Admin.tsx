@@ -24,11 +24,16 @@ const Admin = () => {
             .from('admin_users')
             .select('*')
             .eq('email', user.email)
-            .single();
+            .maybeSingle();
           
           if (error) {
             console.error('Error checking admin status:', error);
             setIsLoggedIn(false);
+            toast({
+              title: "Authentication Error",
+              description: "There was an error verifying your admin status.",
+              variant: "destructive",
+            });
             return;
           }
           
@@ -40,6 +45,11 @@ const Admin = () => {
             });
           } else {
             setIsLoggedIn(false);
+            toast({
+              title: "Access Denied",
+              description: "Your account does not have admin privileges.",
+              variant: "destructive",
+            });
           }
         } else {
           setIsLoggedIn(false);
@@ -47,6 +57,11 @@ const Admin = () => {
       } catch (error) {
         console.error('Admin authentication error:', error);
         setIsLoggedIn(false);
+        toast({
+          title: "Authentication Error",
+          description: "Please try logging in again.",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -65,15 +80,14 @@ const Admin = () => {
   }
 
   if (!isLoggedIn) {
-    toast({
-      title: "Access Denied",
-      description: "You must be logged in as an admin to access this page.",
-      variant: "destructive",
-    });
     return <Navigate to="/admin-login" />;
   }
 
-  return <AdminDashboard />;
+  return (
+    <div className="min-h-screen bg-masjid-light">
+      <AdminDashboard />
+    </div>
+  );
 };
 
 export default Admin;

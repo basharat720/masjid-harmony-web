@@ -8,10 +8,10 @@ import { CalendarIcon, Clock, User, ArrowLeft, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from '../integrations/supabase/client';
 
-// We'll import the same blog posts data that we use in the BlogPosts component
-// This is a temporary solution until we implement a proper data fetching mechanism
-const blogPosts = [
+// Fallback blog posts data for when Supabase connection fails
+const fallbackBlogPosts = [
   {
     id: 1,
     title: "Eid Al-Fitr Celebration Highlights",
@@ -118,9 +118,9 @@ Remember, Ramadan is not just about abstaining from food and drink, but also abo
   }
 ];
 
-// Mock related posts data (will be dynamically determined in a real app)
-const getRelatedPosts = (currentId: number, category: string) => {
-  return blogPosts
+// Get related posts function
+const getRelatedPosts = (currentId: number, category: string, allPosts: any[]) => {
+  return allPosts
     .filter(post => post.id !== currentId && post.category === category)
     .slice(0, 3);
 };
@@ -130,23 +130,59 @@ const BlogPost = () => {
   const [post, setPost] = useState<any>(null);
   const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allPosts, setAllPosts] = useState<any[]>(fallbackBlogPosts);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
     setLoading(true);
     
-    // Find the blog post with the matching ID
-    const postId = Number(id);
-    const foundPost = blogPosts.find(post => post.id === postId);
+    const fetchBlogPosts = async () => {
+      try {
+        // Try to fetch from Supabase first
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const formattedPosts = data.map(post => ({
+            id: post.id,
+            title: post.title,
+            excerpt: post.excerpt,
+            content: post.content,
+            author: post.author,
+            date: post.date,
+            readTime: post.read_time,
+            category: post.category,
+            image: post.image_url
+          }));
+          setAllPosts(formattedPosts);
+        }
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
+        // Fallback to local data
+        setAllPosts(fallbackBlogPosts);
+      }
+    };
     
-    if (foundPost) {
-      setPost(foundPost);
-      setRelatedPosts(getRelatedPosts(postId, foundPost.category));
+    fetchBlogPosts();
+  }, []);
+  
+  useEffect(() => {
+    if (allPosts.length > 0) {
+      // Find the blog post with the matching ID
+      const postId = Number(id);
+      const foundPost = allPosts.find(post => String(post.id) === id);
+      
+      if (foundPost) {
+        setPost(foundPost);
+        setRelatedPosts(getRelatedPosts(postId, foundPost.category, allPosts));
+      }
+      
+      setLoading(false);
     }
-    
-    setLoading(false);
-  }, [id]);
+  }, [id, allPosts]);
 
   const formatPostContent = (content: string) => {
     if (!content) return "";
@@ -305,7 +341,7 @@ const BlogPost = () => {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-xl font-bold text-masjid-primary mb-4">Categories</h3>
                 <div className="flex flex-wrap gap-2">
-                  {Array.from(new Set(blogPosts.map(post => post.category))).map(category => (
+                  {Array.from(new Set(allPosts.map(post => post.category))).map(category => (
                     <Link key={category} to="/blog">
                       <Badge variant="outline" className="hover:bg-masjid-cream cursor-pointer">
                         {category}

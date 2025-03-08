@@ -22,7 +22,7 @@ export const usePrayerTimes = () => {
       try {
         setLoading(true);
         
-        // Try to fetch from Supabase first
+        // Try to fetch from Supabase
         const { data, error } = await supabase
           .from('prayer_times')
           .select('*')
