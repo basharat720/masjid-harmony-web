@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ const categories = ["All", "Events", "Education", "Seasonal", "Youth", "Communit
 const BlogPosts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const navigate = useNavigate();
 
   // Filter posts based on search term and category
   const filteredPosts = blogPosts.filter(post => {
@@ -64,6 +66,10 @@ const BlogPosts = () => {
     const matchesCategory = activeCategory === 'All' || post.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+  
+  const handleReadMore = (postId: number) => {
+    navigate(`/blog/${postId}`);
+  };
 
   return (
     <section className="py-16 bg-masjid-light">
@@ -147,6 +153,7 @@ const BlogPosts = () => {
                   <Button 
                     variant="ghost" 
                     className="text-masjid-primary hover:text-masjid-gold hover:bg-transparent p-0"
+                    onClick={() => handleReadMore(post.id)}
                   >
                     Read More <ChevronRight size={16} />
                   </Button>
