@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Tabs, 
@@ -22,9 +21,11 @@ import {
   Image,
   Folder,
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type GalleryImage = {
   id: string;
@@ -42,7 +43,6 @@ type GalleryFolder = {
   description: string;
 };
 
-// Gallery folders data
 const galleryFolders: GalleryFolder[] = [
   {
     id: "folder1",
@@ -102,9 +102,7 @@ const galleryFolders: GalleryFolder[] = [
   }
 ];
 
-// Extended gallery images with folder assignments
 const galleryImages: GalleryImage[] = [
-  // Masjid Exterior folder - Adding more images
   {
     id: "img1",
     src: "https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=600&h=400",
@@ -148,7 +146,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder1"
   },
   
-  // Prayer Hall folder
   {
     id: "img2",
     src: "https://images.unsplash.com/photo-1604743960161-92e065d583c9?auto=format&fit=crop&w=600&h=400",
@@ -171,7 +168,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder2"
   },
   
-  // Ramadan Activities folder
   {
     id: "img3",
     src: "https://images.unsplash.com/photo-1591825374132-989584e5eb88?auto=format&fit=crop&w=600&h=400",
@@ -194,7 +190,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder3"
   },
   
-  // Eid Celebrations folder
   {
     id: "img4",
     src: "https://images.unsplash.com/photo-1600002423562-754954bb1b6c?auto=format&fit=crop&w=600&h=400",
@@ -217,7 +212,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder4"
   },
   
-  // Islamic Classes folder
   {
     id: "img5",
     src: "https://images.unsplash.com/photo-1566378179254-c4c6bae9d2b7?auto=format&fit=crop&w=600&h=400",
@@ -240,7 +234,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder5"
   },
   
-  // Children's School folder
   {
     id: "img6",
     src: "https://images.unsplash.com/photo-1603565103583-93193e42b2a3?auto=format&fit=crop&w=600&h=400",
@@ -263,7 +256,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder6"
   },
   
-  // Community Service folder
   {
     id: "img13",
     src: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&h=400",
@@ -286,7 +278,6 @@ const galleryImages: GalleryImage[] = [
     folder: "folder7"
   },
   
-  // Interfaith Events folder
   {
     id: "img14",
     src: "https://images.unsplash.com/photo-1603804022303-d4fc84357a91?auto=format&fit=crop&w=600&h=400",
@@ -314,6 +305,7 @@ const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [folderData, setFolderData] = useState<GalleryFolder | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const categories = Array.from(new Set(galleryFolders.map(folder => folder.category)));
 
@@ -328,18 +320,36 @@ const Gallery = () => {
     setFolderData(null);
   };
 
+  const handleImageClick = (image: GalleryImage) => {
+    setSelectedImage(image);
+    setIsOpen(true);
+  };
+
   return (
-    <div className="section-container py-16">
+    <div className="section-container py-16 bg-gradient-to-b from-masjid-light to-white">
       <h2 className="section-title mb-10 flex items-center justify-center">
         <GalleryHorizontal className="mr-2 text-masjid-gold" size={28} />
         <span>Our Gallery</span>
       </h2>
       
+      <div className="mb-6 max-w-2xl mx-auto text-center">
+        <p className="text-muted-foreground">
+          Explore our collection of images showcasing our beautiful masjid, 
+          community events, educational activities, and more.
+        </p>
+      </div>
+      
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-8 flex flex-wrap justify-center">
-          <TabsTrigger value="all">All</TabsTrigger>
+        <TabsList className="mb-8 flex flex-wrap justify-center bg-muted/50 p-1 rounded-lg">
+          <TabsTrigger value="all" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            All
+          </TabsTrigger>
           {categories.map(category => (
-            <TabsTrigger key={category} value={category}>
+            <TabsTrigger 
+              key={category} 
+              value={category}
+              className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               {category.charAt(0).toUpperCase() + category.slice(1)}
             </TabsTrigger>
           ))}
@@ -350,20 +360,28 @@ const Gallery = () => {
             <div className="mb-6 flex items-center">
               <Button 
                 variant="outline" 
-                className="flex items-center mr-4" 
+                className="flex items-center mr-4 group" 
                 onClick={handleBackToFolders}
               >
-                <ArrowLeft size={16} className="mr-1" /> Back to Folders
+                <ArrowLeft size={16} className="mr-1 group-hover:-translate-x-1 transition-transform" /> 
+                Back to Folders
               </Button>
               {folderData && (
-                <h3 className="text-xl font-semibold text-masjid-primary">{folderData.name}</h3>
+                <h3 className="text-xl font-semibold text-masjid-primary flex items-center">
+                  <Folder size={18} className="mr-2 text-masjid-gold" />
+                  {folderData.name}
+                </h3>
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {galleryImages
                 .filter(image => image.folder === currentFolder)
                 .map(image => (
-                  <GalleryCard key={image.id} image={image} onImageClick={setSelectedImage} />
+                  <GalleryImageCard 
+                    key={image.id} 
+                    image={image} 
+                    onImageClick={() => handleImageClick(image)} 
+                  />
                 ))
               }
             </div>
@@ -371,7 +389,7 @@ const Gallery = () => {
         ) : (
           <>
             <TabsContent value="all" className="mt-6 animate-in fade-in-50 duration-300">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {galleryFolders.map(folder => (
                   <FolderCard key={folder.id} folder={folder} onClick={handleFolderClick} />
                 ))}
@@ -380,7 +398,7 @@ const Gallery = () => {
             
             {categories.map(category => (
               <TabsContent key={category} value={category} className="mt-6 animate-in fade-in-50 duration-300">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {galleryFolders
                     .filter(folder => folder.category === category)
                     .map(folder => (
@@ -394,19 +412,31 @@ const Gallery = () => {
         )}
       </Tabs>
       
-      <Dialog>
-        <DialogTrigger asChild>
-          <span className="hidden">Open Image</span>
-        </DialogTrigger>
-        <DialogContent className="max-w-4xl p-1 bg-transparent border-none">
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-4xl p-1 bg-white/90 backdrop-blur-sm border shadow-lg">
           <DialogTitle className="sr-only">Image Preview</DialogTitle>
           <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-2 top-2 rounded-full bg-black/20 hover:bg-black/30 text-white"
+            onClick={() => setIsOpen(false)}
+          >
+            <X size={18} />
+            <span className="sr-only">Close</span>
+          </Button>
           {selectedImage && (
-            <img 
-              src={selectedImage.src.replace('w=600&h=400', 'w=1200&h=800')} 
-              alt={selectedImage.alt} 
-              className="w-full h-auto rounded-lg"
-            />
+            <div className="relative">
+              <img 
+                src={selectedImage.src.replace('w=600&h=400', 'w=1200&h=800')} 
+                alt={selectedImage.alt} 
+                className="w-full h-auto rounded-md"
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                <h3 className="font-medium text-lg">{selectedImage.alt}</h3>
+                <p className="text-sm text-white/80 capitalize">{selectedImage.category}</p>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
@@ -422,14 +452,21 @@ const FolderCard = ({
   onClick: (folderId: string) => void;
 }) => {
   return (
-    <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1" onClick={() => onClick(folder.id)}>
+    <Card 
+      className={cn(
+        "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-muted",
+        "group"
+      )} 
+      onClick={() => onClick(folder.id)}
+    >
       <CardContent className="p-0">
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <img 
             src={folder.thumbnailSrc} 
             alt={folder.name} 
-            className="w-full h-64 object-cover transition-transform duration-500 hover:scale-105"
+            className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <div className="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full">
             <Folder size={18} />
           </div>
@@ -437,9 +474,9 @@ const FolderCard = ({
         <div className="p-4 bg-white">
           <p className="text-base font-medium text-masjid-primary">{folder.name}</p>
           <p className="text-sm text-muted-foreground mt-1">{folder.description}</p>
-          <div className="flex items-center justify-end mt-2 text-sm text-masjid-gold">
+          <div className="flex items-center justify-end mt-2 text-sm text-masjid-gold group-hover:text-masjid-primary transition-colors">
             <span>View Album</span>
-            <ChevronRight size={16} />
+            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </CardContent>
@@ -447,46 +484,36 @@ const FolderCard = ({
   );
 };
 
-const GalleryCard = ({ 
+const GalleryImageCard = ({ 
   image, 
   onImageClick 
 }: { 
   image: GalleryImage; 
-  onImageClick: (image: GalleryImage) => void;
+  onImageClick: () => void;
 }) => {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-          <CardContent className="p-0">
-            <div className="relative">
-              <img 
-                src={image.src} 
-                alt={image.alt} 
-                className="w-full h-64 object-cover transition-transform duration-500 hover:scale-105"
-                onClick={() => onImageClick(image)}
-              />
-              <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full">
-                <Image size={16} />
-              </div>
-            </div>
-            <div className="p-4 bg-white">
-              <p className="text-sm font-medium text-masjid-primary">{image.alt}</p>
-              <p className="text-xs text-muted-foreground mt-1 capitalize">{image.category}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl p-1 bg-transparent border-none">
-        <DialogTitle className="sr-only">Image Preview</DialogTitle>
-        <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
-        <img 
-          src={image.src.replace('w=600&h=400', 'w=1200&h=800')} 
-          alt={image.alt} 
-          className="w-full h-auto rounded-lg"
-        />
-      </DialogContent>
-    </Dialog>
+    <Card 
+      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-muted group"
+      onClick={onImageClick}
+    >
+      <CardContent className="p-0">
+        <div className="relative overflow-hidden">
+          <img 
+            src={image.src} 
+            alt={image.alt} 
+            className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full">
+            <Image size={16} />
+          </div>
+        </div>
+        <div className="p-4 bg-white">
+          <p className="text-sm font-medium text-masjid-primary">{image.alt}</p>
+          <p className="text-xs text-muted-foreground mt-1 capitalize">{image.category}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
