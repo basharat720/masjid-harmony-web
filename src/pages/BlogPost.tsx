@@ -43,22 +43,7 @@ const fallbackBlogPosts = [
     readTime: "6 min read",
     category: "Seasonal",
     image: "https://images.unsplash.com/photo-1532635248-cdd3d399f56c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmFtYWRhbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a augue eget nunc volutpat tincidunt vel nec nulla. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Cras ultrices metus id justo tristique, vel finibus nibh venenatis. Curabitur eget ex vel sapien pellentesque tempus. Donec varius magna vel eros vehicula, vel sagittis metus feugiat. Donec varius magna vel eros vehicula, vel sagittis metus feugiat.\n\nPreparing for Ramadan: A Month-by-Month Guide\n\n1. One Month Before Ramadan:\n   - Begin adjusting your sleep schedule gradually to prepare for early morning suhoor meals.
-   - Start reading more Quran daily to build a habit.
-   - Reduce caffeine intake gradually to minimize withdrawal symptoms during fasting.
-   - Begin planning your Ramadan goals and intentions.
-
-2. Two Weeks Before Ramadan:\n   - Start incorporating voluntary fasts on Mondays and Thursdays.
-   - Create a Ramadan budget for charity, iftar gatherings, and Eid celebrations.
-   - Stock up on essential groceries and prepare meals that can be frozen.
-   - Organize your schedule to accommodate increased worship during Ramadan.
-
-3. The Week Before Ramadan:\n   - Deep clean your home to create a peaceful environment for worship.
-   - Prepare a dedicated prayer space in your home.
-   - Finalize your Ramadan goals and write them down.
-   - Connect with family and friends to plan community iftars and taraweeh prayers.
-
-Remember, Ramadan is not just about abstaining from food and drink, but also about spiritual growth, increased charity, and strengthening your connection with Allah. Use this time wisely to build habits that will continue throughout the year."
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus a augue eget nunc volutpat tincidunt vel nec nulla. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Cras ultrices metus id justo tristique, vel finibus nibh venenatis. Curabitur eget ex vel sapien pellentesque tempus. Donec varius magna vel eros vehicula, vel sagittis metus feugiat. Donec varius magna vel eros vehicula, vel sagittis metus feugiat.\n\nPreparing for Ramadan: A Month-by-Month Guide\n\n1. One Month Before Ramadan:\n   - Begin adjusting your sleep schedule gradually to prepare for early morning suhoor meals.\n   - Start reading more Quran daily to build a habit.\n   - Reduce caffeine intake gradually to minimize withdrawal symptoms during fasting.\n   - Begin planning your Ramadan goals and intentions.\n\n2. Two Weeks Before Ramadan:\n   - Start incorporating voluntary fasts on Mondays and Thursdays.\n   - Create a Ramadan budget for charity, iftar gatherings, and Eid celebrations.\n   - Stock up on essential groceries and prepare meals that can be frozen.\n   - Organize your schedule to accommodate increased worship during Ramadan.\n\n3. The Week Before Ramadan:\n   - Deep clean your home to create a peaceful environment for worship.\n   - Prepare a dedicated prayer space in your home.\n   - Finalize your Ramadan goals and write them down.\n   - Connect with family and friends to plan community iftars and taraweeh prayers.\n\nRemember, Ramadan is not just about abstaining from food and drink, but also about spiritual growth, increased charity, and strengthening your connection with Allah. Use this time wisely to build habits that will continue throughout the year."
   },
   {
     id: 4,
