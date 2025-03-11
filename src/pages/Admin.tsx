@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import AdminDashboard from '../components/AdminDashboard';
-import { supabase } from '../integrations/supabase/client';
+import { authService } from '../services/authService';
 import { useToast } from '@/hooks/use-toast';
 
 const Admin = () => {
@@ -15,42 +15,15 @@ const Admin = () => {
       setIsLoading(true);
       
       try {
-        // Check if there's a session
-        const { data: { user } } = await supabase.auth.getUser();
+        // Check if the user is authenticated
+        const isAuthenticated = authService.isAuthenticated();
         
-        if (user) {
-          // If we have a user, check if they're in the admin_users table
-          const { data, error } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', user.email)
-            .maybeSingle();
-          
-          if (error) {
-            console.error('Error checking admin status:', error);
-            setIsLoggedIn(false);
-            toast({
-              title: "Authentication Error",
-              description: "There was an error verifying your admin status.",
-              variant: "destructive",
-            });
-            return;
-          }
-          
-          if (data) {
-            setIsLoggedIn(true);
-            toast({
-              title: "Welcome back, admin!",
-              description: "You are now logged in to the admin dashboard.",
-            });
-          } else {
-            setIsLoggedIn(false);
-            toast({
-              title: "Access Denied",
-              description: "Your account does not have admin privileges.",
-              variant: "destructive",
-            });
-          }
+        if (isAuthenticated) {
+          setIsLoggedIn(true);
+          toast({
+            title: "Welcome back, admin!",
+            description: "You are now logged in to the admin dashboard.",
+          });
         } else {
           setIsLoggedIn(false);
         }

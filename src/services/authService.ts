@@ -1,10 +1,5 @@
 
-import { createClient } from '@supabase/supabase-js';
-
-// Create a Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qhrnrieztlirempiesok.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocm5yaWV6dGxpcmVtcGllc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAxNTYwNzgsImV4cCI6MjAyNTczMjA3OH0.6Lg7cj9B0YhNQnRnZXGxDRIXiiYR6Igb-wkphqD8Y7o';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthUser {
   id: string;
