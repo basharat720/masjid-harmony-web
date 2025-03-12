@@ -122,6 +122,7 @@ export type Database = {
           adhan_time: string
           arabic_name: string
           created_at: string
+          fiqa_type: string
           id: string
           iqamah_time: string
           name: string
@@ -131,6 +132,7 @@ export type Database = {
           adhan_time: string
           arabic_name: string
           created_at?: string
+          fiqa_type?: string
           id?: string
           iqamah_time: string
           name: string
@@ -140,6 +142,7 @@ export type Database = {
           adhan_time?: string
           arabic_name?: string
           created_at?: string
+          fiqa_type?: string
           id?: string
           iqamah_time?: string
           name?: string

@@ -28,7 +28,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
@@ -40,18 +40,18 @@ const Navbar = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <button onClick={() => scrollToSection('home')} className="navbar-link">Home</button>
-            <button onClick={() => scrollToSection('prayer-times')} className="navbar-link">Prayer Times</button>
-            <button onClick={() => scrollToSection('events')} className="navbar-link">Events</button>
-            <button onClick={() => scrollToSection('gallery')} className="navbar-link flex items-center">
+            <button onClick={() => scrollToSection('home')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Home</button>
+            <button onClick={() => scrollToSection('prayer-times')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Prayer Times</button>
+            <button onClick={() => scrollToSection('events')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Events</button>
+            <button onClick={() => scrollToSection('gallery')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 flex items-center">
               <Image size={16} className="mr-1" /> Gallery
             </button>
-            <button onClick={() => scrollToSection('blog')} className="navbar-link flex items-center">
+            <button onClick={() => scrollToSection('blog')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 flex items-center">
               <FileText size={16} className="mr-1" /> Blog
             </button>
-            <button onClick={() => scrollToSection('contact')} className="navbar-link">Contact</button>
-            <button onClick={() => scrollToSection('donate')} className="cta-button ml-4">Donate</button>
-            <Link to="/admin-login" className="navbar-link">Admin</Link>
+            <button onClick={() => scrollToSection('contact')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Contact</button>
+            <button onClick={() => scrollToSection('donate')} className="bg-masjid-gold hover:bg-masjid-gold/90 text-masjid-navy font-medium px-4 py-2 rounded-md shadow-sm transition-colors duration-300 ml-4">Donate</button>
+            <Link to="/admin-login" className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Admin</Link>
           </div>
           
           {/* Mobile Navigation Toggle */}
@@ -70,18 +70,18 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white">
           <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-            <button onClick={() => scrollToSection('home')} className="block navbar-link w-full text-left">Home</button>
-            <button onClick={() => scrollToSection('prayer-times')} className="block navbar-link w-full text-left">Prayer Times</button>
-            <button onClick={() => scrollToSection('events')} className="block navbar-link w-full text-left">Events</button>
-            <button onClick={() => scrollToSection('gallery')} className="block navbar-link flex items-center w-full text-left">
+            <button onClick={() => scrollToSection('home')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left">Home</button>
+            <button onClick={() => scrollToSection('prayer-times')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left">Prayer Times</button>
+            <button onClick={() => scrollToSection('events')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left">Events</button>
+            <button onClick={() => scrollToSection('gallery')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 flex items-center w-full text-left">
               <Image size={16} className="mr-1" /> Gallery
             </button>
-            <button onClick={() => scrollToSection('blog')} className="block navbar-link flex items-center w-full text-left">
+            <button onClick={() => scrollToSection('blog')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 flex items-center w-full text-left">
               <FileText size={16} className="mr-1" /> Blog
             </button>
-            <button onClick={() => scrollToSection('contact')} className="block navbar-link w-full text-left">Contact</button>
-            <button onClick={() => scrollToSection('donate')} className="cta-button w-full mt-4">Donate</button>
-            <Link to="/admin-login" className="block navbar-link w-full text-left mt-4">Admin</Link>
+            <button onClick={() => scrollToSection('contact')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left">Contact</button>
+            <button onClick={() => scrollToSection('donate')} className="bg-masjid-gold hover:bg-masjid-gold/90 text-masjid-navy font-medium px-4 py-2 rounded-md shadow-sm transition-colors duration-300 w-full mt-4">Donate</button>
+            <Link to="/admin-login" className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left mt-4">Admin</Link>
           </div>
         </div>
       )}

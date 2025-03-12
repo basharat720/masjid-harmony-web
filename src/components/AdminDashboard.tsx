@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   LayoutDashboard, 
   Users, 
@@ -29,11 +29,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 
-// Create a Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qhrnrieztlirempiesok.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocm5yaWV6dGxpcmVtcGllc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAxNTYwNzgsImV4cCI6MjAyNTczMjA3OH0.6Lg7cj9B0YhNQnRnZXGxDRIXiiYR6Igb-wkphqD8Y7o';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -41,6 +36,7 @@ const AdminDashboard = () => {
   const currentUser = authService.getCurrentUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingPrayerId, setEditingPrayerId] = useState<string | null>(null);
   
   // State for data
   const [prayerTimes, setPrayerTimes] = useState([]);
@@ -119,6 +115,7 @@ const AdminDashboard = () => {
           .update({
             adhan_time: prayer.adhan_time,
             iqamah_time: prayer.iqamah_time,
+            fiqa_type: prayer.fiqa_type || 'Jafferia',
             updated_at: new Date().toISOString(),
           })
           .eq('id', prayer.id);
@@ -135,6 +132,47 @@ const AdminDashboard = () => {
       toast({
         title: "Update Failed",
         description: "There was an error updating prayer times. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle individual prayer time update
+  const handleSinglePrayerTimeUpdate = async (prayerId) => {
+    setIsLoading(true);
+    
+    try {
+      const prayer = prayerTimes.find(p => p.id === prayerId);
+      
+      if (!prayer) {
+        throw new Error('Prayer not found');
+      }
+      
+      const { error } = await supabase
+        .from('prayer_times')
+        .update({
+          adhan_time: prayer.adhan_time,
+          iqamah_time: prayer.iqamah_time,
+          fiqa_type: prayer.fiqa_type || 'Jafferia',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', prayer.id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: `${prayer.name} Prayer Updated`,
+        description: `${prayer.name} prayer time has been successfully updated.`,
+      });
+      
+      setEditingPrayerId(null);
+    } catch (error) {
+      console.error('Error updating prayer time:', error);
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating the prayer time. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -182,7 +220,8 @@ const AdminDashboard = () => {
       <div className="w-64 bg-masjid-primary text-white min-h-screen p-4 hidden md:block">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <p className="text-masjid-cream/80 text-sm mt-1">Masjid Imam Hussain</p>
+          <p className="text-white text-sm mt-1">Masjid Imam Hussain</p>
+          <p className="text-masjid-gold text-sm">Fiqa Jafferia</p>
           {currentUser && (
             <div className="mt-2 p-2 bg-white/10 rounded-md">
               <p className="text-sm font-medium">Welcome, {currentUser.username}</p>
@@ -423,26 +462,26 @@ const AdminDashboard = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <Button 
                       onClick={() => setActiveTab("prayer-times")}
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center bg-masjid-primary hover:bg-masjid-primary/90"
                     >
                       <Calendar size={18} className="mr-2" /> Update Prayer Times
                     </Button>
                     <Button 
                       onClick={() => setActiveTab("blog")}
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center bg-masjid-primary hover:bg-masjid-primary/90"
                     >
                       <FileText size={18} className="mr-2" /> Add Blog Post
                     </Button>
                     <Button 
                       onClick={() => setActiveTab("quran")}
                       variant="outline"
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
                     >
                       <BookOpen size={18} className="mr-2" /> Add Resource
                     </Button>
                     <Button 
                       variant="outline"
-                      className="flex items-center justify-center"
+                      className="flex items-center justify-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
                     >
                       <Users size={18} className="mr-2" /> Manage Members
                     </Button>
@@ -457,6 +496,9 @@ const AdminDashboard = () => {
         {activeTab === "prayer-times" && (
           <div>
             <h2 className="text-2xl font-bold text-masjid-primary mb-6">Prayer Times Management</h2>
+            <p className="text-masjid-navy mb-4">
+              Update prayer times for Fiqa Jafferia. You can update all prayer times at once or manage them individually.
+            </p>
             
             <Card className="mb-8 transition-all hover:shadow-md">
               <CardHeader>
@@ -465,36 +507,91 @@ const AdminDashboard = () => {
                   Update Prayer Times
                 </CardTitle>
                 <CardDescription>
-                  These times will be displayed on the website. You can manually adjust them or use calculation methods.
+                  These times will be displayed on the website. You can update all at once or edit individual prayer times.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {prayerTimes.map((prayer, index) => (
-                    <div key={prayer.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b">
-                      <div>
-                        <Label className="text-lg flex items-center">
-                          {prayer.name}
-                          <span className="text-sm text-masjid-navy/60 ml-2">({prayer.arabic_name})</span>
-                        </Label>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`${prayer.name.toLowerCase()}-adhan`}>Adhan Time</Label>
-                        <Input 
-                          id={`${prayer.name.toLowerCase()}-adhan`} 
-                          type="time" 
-                          value={prayer.adhan_time} 
-                          onChange={(e) => handlePrayerTimeChange(index, 'adhan_time', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`${prayer.name.toLowerCase()}-iqamah`}>Iqamah Time</Label>
-                        <Input 
-                          id={`${prayer.name.toLowerCase()}-iqamah`} 
-                          type="time" 
-                          value={prayer.iqamah_time}
-                          onChange={(e) => handlePrayerTimeChange(index, 'iqamah_time', e.target.value)}
-                        />
+                    <div key={prayer.id} className="grid grid-cols-1 gap-4 pb-4 border-b">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center">
+                            <h3 className="text-lg font-semibold text-masjid-primary">{prayer.name}</h3>
+                            <span className="text-sm text-masjid-navy/60 ml-2 font-arabic">({prayer.arabic_name})</span>
+                          </div>
+                          <p className="text-sm text-masjid-navy/70">Fiqa: {prayer.fiqa_type || 'Jafferia'}</p>
+                        </div>
+                        
+                        {editingPrayerId === prayer.id ? (
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`${prayer.name.toLowerCase()}-adhan`}>Adhan Time</Label>
+                              <Input 
+                                id={`${prayer.name.toLowerCase()}-adhan`} 
+                                type="time" 
+                                value={prayer.adhan_time} 
+                                onChange={(e) => handlePrayerTimeChange(index, 'adhan_time', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${prayer.name.toLowerCase()}-iqamah`}>Iqamah Time</Label>
+                              <Input 
+                                id={`${prayer.name.toLowerCase()}-iqamah`} 
+                                type="time" 
+                                value={prayer.iqamah_time}
+                                onChange={(e) => handlePrayerTimeChange(index, 'iqamah_time', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2 md:col-span-2 flex gap-2">
+                              <Button 
+                                onClick={() => handleSinglePrayerTimeUpdate(prayer.id)}
+                                disabled={isLoading}
+                                className="flex items-center bg-masjid-primary hover:bg-masjid-primary/90 flex-1"
+                              >
+                                {isLoading ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Save
+                                  </>
+                                )}
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => setEditingPrayerId(null)}
+                                className="flex items-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-masjid-navy/70">Adhan Time</p>
+                              <p className="font-medium">{formatTimeString(prayer.adhan_time)}</p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-masjid-navy/70">Iqamah Time</p>
+                              <p className="font-medium">{formatTimeString(prayer.iqamah_time)}</p>
+                            </div>
+                            <div className="md:col-span-2">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => setEditingPrayerId(prayer.id)}
+                                className="flex items-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -504,22 +601,46 @@ const AdminDashboard = () => {
                 <Button 
                   onClick={handlePrayerTimesUpdate}
                   disabled={isLoading}
-                  className="flex items-center"
+                  className="flex items-center bg-masjid-primary hover:bg-masjid-primary/90"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      Saving All...
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Changes
+                      Save All Changes
                     </>
                   )}
                 </Button>
               </CardFooter>
             </Card>
+            
+            {/* Helper function to format time string for display */}
+            {function formatTimeString(timeStr) {
+              if (!timeStr) return "N/A";
+              
+              try {
+                // If it's already in AM/PM format, return as is
+                if (timeStr.includes('AM') || timeStr.includes('PM')) {
+                  return timeStr;
+                }
+                
+                // Parse time string (expected format from DB: "HH:MM:SS")
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                
+                // Convert to 12-hour format
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const hours12 = hours % 12 || 12;
+                
+                return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+              } catch (error) {
+                console.error("Error formatting time:", error);
+                return timeStr;
+              }
+            }}
             
             <Card className="transition-all hover:shadow-md">
               <CardHeader>
@@ -536,6 +657,7 @@ const AdminDashboard = () => {
                   <div className="space-y-2">
                     <Label htmlFor="calculation-method">Calculation Method</Label>
                     <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                      <option value="Jafferia">Fiqa Jafferia</option>
                       <option value="ISNA">ISNA (North America)</option>
                       <option value="MWL">Muslim World League</option>
                       <option value="Egyptian">Egyptian General Authority</option>
@@ -548,6 +670,7 @@ const AdminDashboard = () => {
                     <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                       <option value="Standard">Standard (Shafi'i, Maliki, Hanbali)</option>
                       <option value="Hanafi">Hanafi</option>
+                      <option value="Jafferi">Jafferi</option>
                     </select>
                   </div>
                 </div>
@@ -569,7 +692,7 @@ const AdminDashboard = () => {
                     title: "Changes applied",
                     description: "Prayer times calculations have been updated.",
                   });
-                }}>
+                }} className="bg-masjid-primary hover:bg-masjid-primary/90">
                   <Save className="mr-2 h-4 w-4" />
                   Apply Changes
                 </Button>

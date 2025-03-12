@@ -14,14 +14,14 @@ const Hero = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6 animate-fade-in">
             Welcome to Masjid Imam Hussain
           </h1>
-          <p className="text-lg md:text-xl text-masjid-cream mb-8 animate-slide-up">
+          <p className="text-lg md:text-xl text-white mb-8 animate-slide-up">
             A place of worship, learning, and community service dedicated to the worship of Allah and following the teachings of Islam.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button className="bg-masjid-gold hover:bg-masjid-gold/90 text-masjid-navy font-medium px-8 py-6 text-lg rounded-md shadow-lg transition-all w-full sm:w-auto">
               Prayer Times
             </Button>
-            <Button variant="outline" className="border-white hover:bg-white/10 text-white font-medium px-8 py-6 text-lg rounded-md transition-all w-full sm:w-auto">
+            <Button variant="outline" className="border-white bg-transparent hover:bg-white hover:text-masjid-primary font-medium px-8 py-6 text-lg rounded-md transition-all w-full sm:w-auto">
               Learn More <ArrowRight size={18} className="ml-2" />
             </Button>
           </div>

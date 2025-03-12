@@ -9,6 +9,8 @@ type PrayerTime = {
   adhan: string;
   iqamah: string;
   arabicName: string;
+  fiqa_type: string;
+  id: string;
 };
 
 export const usePrayerTimes = () => {
@@ -33,22 +35,24 @@ export const usePrayerTimes = () => {
         if (data && data.length > 0) {
           // Format the data from Supabase
           const formattedTimes = data.map(prayer => ({
+            id: prayer.id,
             name: prayer.name,
             arabicName: prayer.arabic_name,
             time: formatTimeString(prayer.adhan_time),
             adhan: formatTimeString(prayer.adhan_time),
-            iqamah: formatTimeString(prayer.iqamah_time)
+            iqamah: formatTimeString(prayer.iqamah_time),
+            fiqa_type: prayer.fiqa_type || 'Jafferia'
           }));
           
           setPrayerTimes(formattedTimes);
         } else {
           // Fallback to default times if no data in Supabase
           setPrayerTimes([
-            { name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر' },
-            { name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر' },
-            { name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر' },
-            { name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب' },
-            { name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء' },
+            { id: '1', name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر', fiqa_type: 'Jafferia' },
+            { id: '2', name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر', fiqa_type: 'Jafferia' },
+            { id: '3', name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر', fiqa_type: 'Jafferia' },
+            { id: '4', name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب', fiqa_type: 'Jafferia' },
+            { id: '5', name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء', fiqa_type: 'Jafferia' },
           ]);
         }
       } catch (err) {
@@ -57,11 +61,11 @@ export const usePrayerTimes = () => {
         
         // Set default prayer times as fallback
         setPrayerTimes([
-          { name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر' },
-          { name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر' },
-          { name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر' },
-          { name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب' },
-          { name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء' },
+          { id: '1', name: 'Fajr', time: '5:30 AM', adhan: '5:20 AM', iqamah: '5:40 AM', arabicName: 'الفجر', fiqa_type: 'Jafferia' },
+          { id: '2', name: 'Dhuhr', time: '1:15 PM', adhan: '1:05 PM', iqamah: '1:25 PM', arabicName: 'الظهر', fiqa_type: 'Jafferia' },
+          { id: '3', name: 'Asr', time: '4:45 PM', adhan: '4:35 PM', iqamah: '4:55 PM', arabicName: 'العصر', fiqa_type: 'Jafferia' },
+          { id: '4', name: 'Maghrib', time: '7:05 PM', adhan: '7:05 PM', iqamah: '7:15 PM', arabicName: 'المغرب', fiqa_type: 'Jafferia' },
+          { id: '5', name: 'Isha', time: '8:30 PM', adhan: '8:20 PM', iqamah: '8:40 PM', arabicName: 'العشاء', fiqa_type: 'Jafferia' },
         ]);
       } finally {
         setLoading(false);
