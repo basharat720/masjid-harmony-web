@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,25 +24,17 @@ import {
   Trash2,
   Edit,
   Plus,
-  Loader2
+  Loader2,
+  ImageIcon,
+  HeartHandshake,
+  Phone,
+  Mail,
+  MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 
 const AdminDashboard = () => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const navigate = useNavigate();
-  const currentUser = authService.getCurrentUser();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [editingPrayerId, setEditingPrayerId] = useState<string | null>(null);
-  
-  // State for data
-  const [prayerTimes, setPrayerTimes] = useState([]);
-  const [blogPosts, setBlogPosts] = useState([]);
-  const [events, setEvents] = useState([]);
-  
   // Helper function to format time strings
   const formatTimeString = (timeStr: string): string => {
     if (!timeStr) return "N/A";
@@ -65,6 +58,42 @@ const AdminDashboard = () => {
       return timeStr;
     }
   };
+
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+  const currentUser = authService.getCurrentUser();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingPrayerId, setEditingPrayerId] = useState<string | null>(null);
+  
+  // State for data
+  const [prayerTimes, setPrayerTimes] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [contactInfo, setContactInfo] = useState({
+    address: '123 Islamic Way, Harmony City',
+    phone: '(123) 456-7890',
+    email: 'info@masjidimamhussain.org',
+    socialLinks: {
+      facebook: 'https://facebook.com/masjidimamhussain',
+      instagram: 'https://instagram.com/masjidimamhussain',
+      twitter: 'https://twitter.com/masjidimamhussain',
+      youtube: 'https://youtube.com/masjidimamhussain',
+    }
+  });
+  const [donationSettings, setDonationSettings] = useState({
+    headline: 'Support Our Masjid',
+    description: 'Your donations help us maintain the masjid, support community programs, and organize educational activities.',
+    paypalLink: 'https://paypal.me/masjidimamhussain',
+    venmoLink: 'https://venmo.com/masjidimamhussain',
+    zelleName: 'masjid@imamhussain.org',
+    bankName: 'Islamic Community Bank',
+    accountName: 'Masjid Imam Hussain',
+    accountNumber: '1234567890',
+    routingNumber: '123456789',
+  });
   
   // Fetch data on load
   useEffect(() => {
@@ -97,6 +126,14 @@ const AdminDashboard = () => {
           
         if (eventsError) throw eventsError;
         if (eventsData) setEvents(eventsData);
+        
+        // Placeholder for gallery images fetch
+        // In a real app, you would fetch from Supabase storage or another table
+        setGalleryImages([
+          { id: '1', title: 'Masjid Interior', url: '/images/gallery/interior.jpg', alt: 'Interior of the masjid' },
+          { id: '2', title: 'Eid Celebration', url: '/images/gallery/eid.jpg', alt: 'Eid celebration' },
+          { id: '3', title: 'Friday Prayer', url: '/images/gallery/friday.jpg', alt: 'Friday congregation' },
+        ]);
         
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -208,6 +245,309 @@ const AdminDashboard = () => {
     updatedPrayerTimes[index][field] = value;
     setPrayerTimes(updatedPrayerTimes);
   };
+
+  // Handle event management
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    category: 'General',
+    featured: false
+  });
+
+  const handleEventChange = (field, value) => {
+    setNewEvent({
+      ...newEvent,
+      [field]: value
+    });
+  };
+
+  const handleAddEvent = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('events')
+        .insert([{
+          title: newEvent.title,
+          description: newEvent.description,
+          date: newEvent.date,
+          time: newEvent.time,
+          location: newEvent.location,
+          category: newEvent.category,
+          featured: newEvent.featured
+        }]);
+        
+      if (error) throw error;
+      
+      // Refresh events list
+      const { data } = await supabase
+        .from('events')
+        .select('*')
+        .order('date');
+        
+      if (data) setEvents(data);
+      
+      // Reset form
+      setNewEvent({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        location: '',
+        category: 'General',
+        featured: false
+      });
+      
+      toast({
+        title: "Event Added",
+        description: "The event has been successfully added.",
+      });
+    } catch (error) {
+      console.error('Error adding event:', error);
+      toast({
+        title: "Add Failed",
+        description: "There was an error adding the event. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async (id) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Update events list
+      setEvents(events.filter(event => event.id !== id));
+      
+      toast({
+        title: "Event Deleted",
+        description: "The event has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Delete Failed",
+        description: "There was an error deleting the event. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Blog post management
+  const [newBlogPost, setNewBlogPost] = useState({
+    title: '',
+    author: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    image_url: '',
+    read_time: '5 min'
+  });
+
+  const handleBlogPostChange = (field, value) => {
+    setNewBlogPost({
+      ...newBlogPost,
+      [field]: value
+    });
+  };
+
+  const handleAddBlogPost = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .insert([{
+          title: newBlogPost.title,
+          author: newBlogPost.author,
+          excerpt: newBlogPost.excerpt,
+          content: newBlogPost.content,
+          category: newBlogPost.category,
+          image_url: newBlogPost.image_url || '/placeholder.svg',
+          read_time: newBlogPost.read_time,
+          date: new Date().toISOString().split('T')[0]
+        }]);
+        
+      if (error) throw error;
+      
+      // Refresh blog posts list
+      const { data } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('date', { ascending: false });
+        
+      if (data) setBlogPosts(data);
+      
+      // Reset form
+      setNewBlogPost({
+        title: '',
+        author: '',
+        excerpt: '',
+        content: '',
+        category: '',
+        image_url: '',
+        read_time: '5 min'
+      });
+      
+      toast({
+        title: "Blog Post Added",
+        description: "The blog post has been successfully added.",
+      });
+    } catch (error) {
+      console.error('Error adding blog post:', error);
+      toast({
+        title: "Add Failed",
+        description: "There was an error adding the blog post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteBlogPost = async (id) => {
+    if (!confirm('Are you sure you want to delete this blog post?')) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Update blog posts list
+      setBlogPosts(blogPosts.filter(post => post.id !== id));
+      
+      toast({
+        title: "Blog Post Deleted",
+        description: "The blog post has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      toast({
+        title: "Delete Failed",
+        description: "There was an error deleting the blog post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Gallery management
+  const [newImage, setNewImage] = useState({
+    title: '',
+    alt: '',
+    url: ''
+  });
+
+  const handleImageChange = (field, value) => {
+    setNewImage({
+      ...newImage,
+      [field]: value
+    });
+  };
+
+  const handleAddImage = () => {
+    // In a real app, you would upload to Supabase storage
+    // and then save the URL in the database
+    const newId = String(galleryImages.length + 1);
+    
+    setGalleryImages([
+      ...galleryImages,
+      {
+        id: newId,
+        title: newImage.title,
+        url: newImage.url || '/placeholder.svg',
+        alt: newImage.alt
+      }
+    ]);
+    
+    setNewImage({
+      title: '',
+      alt: '',
+      url: ''
+    });
+    
+    toast({
+      title: "Image Added",
+      description: "The image has been successfully added to the gallery.",
+    });
+  };
+
+  const handleDeleteImage = (id) => {
+    if (!confirm('Are you sure you want to delete this image?')) return;
+    
+    // In a real app, you would also delete from Supabase storage
+    setGalleryImages(galleryImages.filter(image => image.id !== id));
+    
+    toast({
+      title: "Image Deleted",
+      description: "The image has been successfully deleted from the gallery.",
+    });
+  };
+
+  // Contact info management
+  const handleContactInfoChange = (field, value) => {
+    setContactInfo({
+      ...contactInfo,
+      [field]: value
+    });
+  };
+
+  const handleSocialLinkChange = (platform, value) => {
+    setContactInfo({
+      ...contactInfo,
+      socialLinks: {
+        ...contactInfo.socialLinks,
+        [platform]: value
+      }
+    });
+  };
+
+  const handleSaveContactInfo = () => {
+    // In a real app, you would save to Supabase
+    toast({
+      title: "Contact Info Updated",
+      description: "The contact information has been successfully updated.",
+    });
+  };
+
+  // Donation settings management
+  const handleDonationSettingChange = (field, value) => {
+    setDonationSettings({
+      ...donationSettings,
+      [field]: value
+    });
+  };
+
+  const handleSaveDonationSettings = () => {
+    // In a real app, you would save to Supabase
+    toast({
+      title: "Donation Settings Updated",
+      description: "The donation settings have been successfully updated.",
+    });
+  };
   
   // Stats for the dashboard
   const stats = [
@@ -275,6 +615,16 @@ const AdminDashboard = () => {
           </button>
           
           <button 
+            onClick={() => setActiveTab("events")}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+              activeTab === "events" ? "bg-white/10" : "hover:bg-white/5"
+            }`}
+          >
+            <Calendar size={20} />
+            <span>Events</span>
+          </button>
+          
+          <button 
             onClick={() => setActiveTab("blog")}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
               activeTab === "blog" ? "bg-white/10" : "hover:bg-white/5"
@@ -285,13 +635,33 @@ const AdminDashboard = () => {
           </button>
           
           <button 
-            onClick={() => setActiveTab("quran")}
+            onClick={() => setActiveTab("gallery")}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
-              activeTab === "quran" ? "bg-white/10" : "hover:bg-white/5"
+              activeTab === "gallery" ? "bg-white/10" : "hover:bg-white/5"
             }`}
           >
-            <BookOpen size={20} />
-            <span>Quran & Resources</span>
+            <ImageIcon size={20} />
+            <span>Gallery</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("contact")}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+              activeTab === "contact" ? "bg-white/10" : "hover:bg-white/5"
+            }`}
+          >
+            <Phone size={20} />
+            <span>Contact Info</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("donations")}
+            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+              activeTab === "donations" ? "bg-white/10" : "hover:bg-white/5"
+            }`}
+          >
+            <HeartHandshake size={20} />
+            <span>Support Our Masjid</span>
           </button>
           
           <button 
@@ -370,6 +740,19 @@ const AdminDashboard = () => {
               
               <button 
                 onClick={() => {
+                  setActiveTab("events");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "events" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <Calendar size={20} />
+                <span>Events</span>
+              </button>
+              
+              <button 
+                onClick={() => {
                   setActiveTab("blog");
                   setIsMobileMenuOpen(false);
                 }}
@@ -383,15 +766,41 @@ const AdminDashboard = () => {
               
               <button 
                 onClick={() => {
-                  setActiveTab("quran");
+                  setActiveTab("gallery");
                   setIsMobileMenuOpen(false);
                 }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
-                  activeTab === "quran" ? "bg-white/10" : "hover:bg-white/5"
+                  activeTab === "gallery" ? "bg-white/10" : "hover:bg-white/5"
                 }`}
               >
-                <BookOpen size={20} />
-                <span>Quran & Resources</span>
+                <ImageIcon size={20} />
+                <span>Gallery</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("contact");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "contact" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <Phone size={20} />
+                <span>Contact Info</span>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setActiveTab("donations");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-md transition ${
+                  activeTab === "donations" ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <HeartHandshake size={20} />
+                <span>Support Our Masjid</span>
               </button>
               
               <button 
@@ -490,23 +899,24 @@ const AdminDashboard = () => {
                       <Calendar size={18} className="mr-2" /> Update Prayer Times
                     </Button>
                     <Button 
-                      onClick={() => setActiveTab("blog")}
+                      onClick={() => setActiveTab("events")}
                       className="flex items-center justify-center bg-masjid-primary hover:bg-masjid-primary/90"
+                    >
+                      <Calendar size={18} className="mr-2" /> Manage Events
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab("blog")}
+                      variant="outline"
+                      className="flex items-center justify-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
                     >
                       <FileText size={18} className="mr-2" /> Add Blog Post
                     </Button>
                     <Button 
-                      onClick={() => setActiveTab("quran")}
+                      onClick={() => setActiveTab("gallery")}
                       variant="outline"
                       className="flex items-center justify-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
                     >
-                      <BookOpen size={18} className="mr-2" /> Add Resource
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      className="flex items-center justify-center border-masjid-primary text-masjid-primary hover:bg-masjid-primary/10"
-                    >
-                      <Users size={18} className="mr-2" /> Manage Members
+                      <ImageIcon size={18} className="mr-2" /> Manage Gallery
                     </Button>
                   </div>
                 </CardContent>
@@ -700,6 +1110,170 @@ const AdminDashboard = () => {
           </div>
         )}
         
+        {/* Events Management */}
+        {activeTab === "events" && (
+          <div>
+            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Events Management</h2>
+            
+            <Card className="mb-8 transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Plus size={18} className="mr-2 text-masjid-primary" />
+                  Create New Event
+                </CardTitle>
+                <CardDescription>
+                  Add a new event to the masjid calendar
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Event Title</Label>
+                    <Input 
+                      id="title" 
+                      placeholder="Enter event title" 
+                      value={newEvent.title}
+                      onChange={(e) => handleEventChange('title', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Date</Label>
+                      <Input 
+                        id="date" 
+                        type="date" 
+                        value={newEvent.date}
+                        onChange={(e) => handleEventChange('date', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="time">Time</Label>
+                      <Input 
+                        id="time" 
+                        type="time" 
+                        value={newEvent.time}
+                        onChange={(e) => handleEventChange('time', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={newEvent.category}
+                        onChange={(e) => handleEventChange('category', e.target.value)}
+                      >
+                        <option value="General">General</option>
+                        <option value="Prayer">Prayer</option>
+                        <option value="Education">Education</option>
+                        <option value="Community">Community</option>
+                        <option value="Youth">Youth</option>
+                        <option value="Special">Special</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input 
+                      id="location" 
+                      placeholder="Event location" 
+                      value={newEvent.location}
+                      onChange={(e) => handleEventChange('location', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      placeholder="Event description" 
+                      value={newEvent.description}
+                      onChange={(e) => handleEventChange('description', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      checked={newEvent.featured}
+                      onChange={(e) => handleEventChange('featured', e.target.checked)}
+                      className="rounded border-gray-300 text-masjid-primary focus:ring-masjid-primary"
+                    />
+                    <Label htmlFor="featured">Feature this event on the home page</Label>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={handleAddEvent}
+                  disabled={isLoading}
+                  className="bg-masjid-primary hover:bg-masjid-primary/90"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Event
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar size={18} className="mr-2 text-masjid-primary" />
+                  Manage Existing Events
+                </CardTitle>
+                <CardDescription>
+                  Edit or delete existing events
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {events.map((event) => (
+                    <div key={event.id} className="flex flex-col md:flex-row justify-between p-4 border rounded-md space-y-2 md:space-y-0 md:items-center">
+                      <div>
+                        <p className="font-medium">{event.title}</p>
+                        <p className="text-sm text-masjid-navy/70">
+                          {new Date(event.date).toLocaleDateString()} at {event.time} • {event.location}
+                        </p>
+                        {event.featured && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-masjid-gold/20 text-masjid-gold">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" className="flex items-center">
+                          <Edit className="mr-1 h-3 w-3" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="flex items-center"
+                          onClick={() => handleDeleteEvent(event.id)}
+                        >
+                          <Trash2 className="mr-1 h-3 w-3" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
         {/* Blog Posts Management */}
         {activeTab === "blog" && (
           <div>
@@ -719,13 +1293,22 @@ const AdminDashboard = () => {
                 <form className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Post Title</Label>
-                    <Input id="title" placeholder="Enter blog post title" />
+                    <Input 
+                      id="title" 
+                      placeholder="Enter blog post title" 
+                      value={newBlogPost.title}
+                      onChange={(e) => handleBlogPostChange('title', e.target.value)}
+                    />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={newBlogPost.category}
+                        onChange={(e) => handleBlogPostChange('category', e.target.value)}
+                      >
                         <option value="">Select a category</option>
                         <option value="Events">Events</option>
                         <option value="Education">Education</option>
@@ -736,35 +1319,75 @@ const AdminDashboard = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="author">Author</Label>
-                      <Input id="author" placeholder="Author name" />
+                      <Input 
+                        id="author" 
+                        placeholder="Author name" 
+                        value={newBlogPost.author}
+                        onChange={(e) => handleBlogPostChange('author', e.target.value)}
+                      />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="excerpt">Excerpt</Label>
-                    <Textarea id="excerpt" placeholder="Brief summary of the post" />
+                    <Textarea 
+                      id="excerpt" 
+                      placeholder="Brief summary of the post" 
+                      value={newBlogPost.excerpt}
+                      onChange={(e) => handleBlogPostChange('excerpt', e.target.value)}
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="content">Content</Label>
-                    <Textarea id="content" placeholder="Full content of the blog post" className="min-h-[200px]" />
+                    <Textarea 
+                      id="content" 
+                      placeholder="Full content of the blog post" 
+                      className="min-h-[200px]" 
+                      value={newBlogPost.content}
+                      onChange={(e) => handleBlogPostChange('content', e.target.value)}
+                    />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="image">Featured Image</Label>
-                    <Input id="image" type="file" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Featured Image URL</Label>
+                      <Input 
+                        id="image" 
+                        placeholder="Image URL" 
+                        value={newBlogPost.image_url}
+                        onChange={(e) => handleBlogPostChange('image_url', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="read-time">Read Time</Label>
+                      <Input 
+                        id="read-time" 
+                        placeholder="e.g., 5 min" 
+                        value={newBlogPost.read_time}
+                        onChange={(e) => handleBlogPostChange('read_time', e.target.value)}
+                      />
+                    </div>
                   </div>
                 </form>
               </CardContent>
               <CardFooter>
-                <Button onClick={() => {
-                  toast({
-                    title: "Blog post created",
-                    description: "Your blog post has been successfully created.",
-                  });
-                }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Publish Post
+                <Button 
+                  onClick={handleAddBlogPost}
+                  disabled={isLoading}
+                  className="bg-masjid-primary hover:bg-masjid-primary/90"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Publish Post
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>
@@ -781,12 +1404,12 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {blogPosts.map((post, index) => (
+                  {blogPosts.map((post) => (
                     <div key={post.id} className="flex flex-col md:flex-row md:justify-between md:items-center p-3 border rounded-md space-y-2 md:space-y-0">
                       <div>
                         <p className="font-medium">{post.title}</p>
                         <p className="text-sm text-masjid-navy/70">
-                          {new Date(post.date).toLocaleDateString()} • {post.category}
+                          {new Date(post.date).toLocaleDateString()} • {post.category} • By {post.author}
                         </p>
                       </div>
                       <div className="flex space-x-2">
@@ -794,7 +1417,12 @@ const AdminDashboard = () => {
                           <Edit className="mr-1 h-3 w-3" />
                           Edit
                         </Button>
-                        <Button variant="destructive" size="sm" className="flex items-center">
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="flex items-center"
+                          onClick={() => handleDeleteBlogPost(post.id)}
+                        >
                           <Trash2 className="mr-1 h-3 w-3" />
                           Delete
                         </Button>
@@ -807,172 +1435,326 @@ const AdminDashboard = () => {
           </div>
         )}
         
-        {/* Quran & Resources Management */}
-        {activeTab === "quran" && (
+        {/* Gallery Management */}
+        {activeTab === "gallery" && (
           <div>
-            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Quran & Resources Management</h2>
+            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Gallery Management</h2>
             
-            <Tabs defaultValue="recitations">
-              <TabsList className="mb-6">
-                <TabsTrigger value="recitations">Recitations</TabsTrigger>
-                <TabsTrigger value="resources">Resources</TabsTrigger>
-                <TabsTrigger value="lectures">Lectures</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="recitations">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Add New Recitation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="surah">Surah/Passage</Label>
-                          <Input id="surah" placeholder="e.g., Surah Al-Fatiha" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="reciter">Reciter</Label>
-                          <Input id="reciter" placeholder="Name of the reciter" />
-                        </div>
+            <Card className="mb-8 transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Plus size={18} className="mr-2 text-masjid-primary" />
+                  Add New Image
+                </CardTitle>
+                <CardDescription>
+                  Add a new image to the masjid gallery
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="image-title">Image Title</Label>
+                    <Input 
+                      id="image-title" 
+                      placeholder="Enter image title" 
+                      value={newImage.title}
+                      onChange={(e) => handleImageChange('title', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="image-alt">Alt Text</Label>
+                    <Input 
+                      id="image-alt" 
+                      placeholder="Descriptive text for accessibility" 
+                      value={newImage.alt}
+                      onChange={(e) => handleImageChange('alt', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="image-url">Image URL</Label>
+                    <Input 
+                      id="image-url" 
+                      placeholder="URL to the image" 
+                      value={newImage.url}
+                      onChange={(e) => handleImageChange('url', e.target.value)}
+                    />
+                    <p className="text-xs text-masjid-navy/60">
+                      * In a real application, you would upload the image directly instead of providing a URL.
+                    </p>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleAddImage} className="bg-masjid-primary hover:bg-masjid-primary/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add to Gallery
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ImageIcon size={18} className="mr-2 text-masjid-primary" />
+                  Manage Gallery Images
+                </CardTitle>
+                <CardDescription>
+                  Edit or delete images in the gallery
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {galleryImages.map((image) => (
+                    <div key={image.id} className="border rounded-md overflow-hidden group relative">
+                      <img 
+                        src={image.url} 
+                        alt={image.alt} 
+                        className="w-full h-48 object-cover" 
+                      />
+                      <div className="p-3">
+                        <p className="font-medium">{image.title}</p>
                       </div>
-                      
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleDeleteImage(image.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
+        {/* Contact Info Management */}
+        {activeTab === "contact" && (
+          <div>
+            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Contact Information Management</h2>
+            
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Phone size={18} className="mr-2 text-masjid-primary" />
+                  Update Contact Information
+                </CardTitle>
+                <CardDescription>
+                  Manage contact details displayed on the website
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium" htmlFor="address">Physical Address</Label>
+                    <Textarea 
+                      id="address" 
+                      placeholder="Masjid address" 
+                      value={contactInfo.address}
+                      onChange={(e) => handleContactInfoChange('address', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-base font-medium" htmlFor="phone">Phone Number</Label>
+                      <Input 
+                        id="phone" 
+                        placeholder="Phone number" 
+                        value={contactInfo.phone}
+                        onChange={(e) => handleContactInfoChange('phone', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-base font-medium" htmlFor="email">Email Address</Label>
+                      <Input 
+                        id="email" 
+                        placeholder="Email address" 
+                        value={contactInfo.email}
+                        onChange={(e) => handleContactInfoChange('email', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium text-masjid-primary mb-3">Social Media Links</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="audio-file">Audio File</Label>
-                        <Input id="audio-file" type="file" accept="audio/*" />
+                        <Label htmlFor="facebook">Facebook</Label>
+                        <Input 
+                          id="facebook" 
+                          placeholder="Facebook URL" 
+                          value={contactInfo.socialLinks.facebook}
+                          onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
+                        />
                       </div>
-                      
                       <div className="space-y-2">
-                        <Label htmlFor="recitation-image">Cover Image</Label>
-                        <Input id="recitation-image" type="file" accept="image/*" />
+                        <Label htmlFor="instagram">Instagram</Label>
+                        <Input 
+                          id="instagram" 
+                          placeholder="Instagram URL" 
+                          value={contactInfo.socialLinks.instagram}
+                          onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
+                        />
                       </div>
-                    </form>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => {
-                      toast({
-                        title: "Recitation added",
-                        description: "The Quran recitation has been added successfully.",
-                      });
-                    }}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Recitation
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="resources">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Add New Resource</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="resource-title">Title</Label>
-                        <Input id="resource-title" placeholder="Resource title" />
+                        <Label htmlFor="twitter">Twitter</Label>
+                        <Input 
+                          id="twitter" 
+                          placeholder="Twitter URL" 
+                          value={contactInfo.socialLinks.twitter}
+                          onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
+                        />
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="resource-author">Author</Label>
-                          <Input id="resource-author" placeholder="Author name" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="resource-type">Type</Label>
-                          <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                            <option value="PDF">PDF</option>
-                            <option value="Book">Book</option>
-                            <option value="Article">Article</option>
-                            <option value="Audio">Audio</option>
-                          </select>
-                        </div>
-                      </div>
-                      
                       <div className="space-y-2">
-                        <Label htmlFor="resource-description">Description</Label>
-                        <Textarea id="resource-description" placeholder="Brief description of the resource" />
+                        <Label htmlFor="youtube">YouTube</Label>
+                        <Input 
+                          id="youtube" 
+                          placeholder="YouTube URL" 
+                          value={contactInfo.socialLinks.youtube}
+                          onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
+                        />
                       </div>
-                      
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSaveContactInfo} className="bg-masjid-primary hover:bg-masjid-primary/90">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Contact Information
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        )}
+        
+        {/* Donations Management */}
+        {activeTab === "donations" && (
+          <div>
+            <h2 className="text-2xl font-bold text-masjid-primary mb-6">Support Our Masjid Management</h2>
+            
+            <Card className="transition-all hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <HeartHandshake size={18} className="mr-2 text-masjid-primary" />
+                  Donation Information
+                </CardTitle>
+                <CardDescription>
+                  Manage donation information and payment methods
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium" htmlFor="donation-headline">Donation Headline</Label>
+                    <Input 
+                      id="donation-headline" 
+                      placeholder="Main headline for donation section" 
+                      value={donationSettings.headline}
+                      onChange={(e) => handleDonationSettingChange('headline', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium" htmlFor="donation-description">Description</Label>
+                    <Textarea 
+                      id="donation-description" 
+                      placeholder="Description for donation section" 
+                      value={donationSettings.description}
+                      onChange={(e) => handleDonationSettingChange('description', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium text-masjid-primary mb-3">Online Payment Methods</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="resource-file">Resource File</Label>
-                        <Input id="resource-file" type="file" />
+                        <Label htmlFor="paypal">PayPal Link</Label>
+                        <Input 
+                          id="paypal" 
+                          placeholder="PayPal.me link" 
+                          value={donationSettings.paypalLink}
+                          onChange={(e) => handleDonationSettingChange('paypalLink', e.target.value)}
+                        />
                       </div>
-                      
                       <div className="space-y-2">
-                        <Label htmlFor="resource-image">Cover Image</Label>
-                        <Input id="resource-image" type="file" accept="image/*" />
+                        <Label htmlFor="venmo">Venmo Link</Label>
+                        <Input 
+                          id="venmo" 
+                          placeholder="Venmo link" 
+                          value={donationSettings.venmoLink}
+                          onChange={(e) => handleDonationSettingChange('venmoLink', e.target.value)}
+                        />
                       </div>
-                    </form>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => {
-                      toast({
-                        title: "Resource added",
-                        description: "The resource has been added successfully.",
-                      });
-                    }}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Resource
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="lectures">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Add New Lecture</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="lecture-title">Title</Label>
-                        <Input id="lecture-title" placeholder="Lecture title" />
+                        <Label htmlFor="zelle">Zelle Email/Phone</Label>
+                        <Input 
+                          id="zelle" 
+                          placeholder="Email or phone for Zelle" 
+                          value={donationSettings.zelleName}
+                          onChange={(e) => handleDonationSettingChange('zelleName', e.target.value)}
+                        />
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="lecture-speaker">Speaker</Label>
-                          <Input id="lecture-speaker" placeholder="Speaker name" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lecture-duration">Duration</Label>
-                          <Input id="lecture-duration" placeholder="e.g., 45:30" />
-                        </div>
-                      </div>
-                      
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium text-masjid-primary mb-3">Bank Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="lecture-description">Description</Label>
-                        <Textarea id="lecture-description" placeholder="Brief description of the lecture" />
+                        <Label htmlFor="bank-name">Bank Name</Label>
+                        <Input 
+                          id="bank-name" 
+                          placeholder="Bank name" 
+                          value={donationSettings.bankName}
+                          onChange={(e) => handleDonationSettingChange('bankName', e.target.value)}
+                        />
                       </div>
-                      
                       <div className="space-y-2">
-                        <Label htmlFor="video-url">Video URL</Label>
-                        <Input id="video-url" placeholder="e.g., https://youtube.com/watch?v=..." />
+                        <Label htmlFor="account-name">Account Name</Label>
+                        <Input 
+                          id="account-name" 
+                          placeholder="Account name" 
+                          value={donationSettings.accountName}
+                          onChange={(e) => handleDonationSettingChange('accountName', e.target.value)}
+                        />
                       </div>
-                      
                       <div className="space-y-2">
-                        <Label htmlFor="lecture-thumbnail">Thumbnail</Label>
-                        <Input id="lecture-thumbnail" type="file" accept="image/*" />
+                        <Label htmlFor="account-number">Account Number</Label>
+                        <Input 
+                          id="account-number" 
+                          placeholder="Account number" 
+                          value={donationSettings.accountNumber}
+                          onChange={(e) => handleDonationSettingChange('accountNumber', e.target.value)}
+                        />
                       </div>
-                    </form>
-                  </CardContent>
-                  <CardFooter>
-                    <Button onClick={() => {
-                      toast({
-                        title: "Lecture added",
-                        description: "The lecture has been added successfully.",
-                      });
-                    }}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Lecture
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                      <div className="space-y-2">
+                        <Label htmlFor="routing-number">Routing Number</Label>
+                        <Input 
+                          id="routing-number" 
+                          placeholder="Routing number" 
+                          value={donationSettings.routingNumber}
+                          onChange={(e) => handleDonationSettingChange('routingNumber', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSaveDonationSettings} className="bg-masjid-primary hover:bg-masjid-primary/90">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Donation Information
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         )}
         
