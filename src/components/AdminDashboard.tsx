@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +41,30 @@ const AdminDashboard = () => {
   const [prayerTimes, setPrayerTimes] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
   const [events, setEvents] = useState([]);
+  
+  // Helper function to format time strings
+  const formatTimeString = (timeStr: string): string => {
+    if (!timeStr) return "N/A";
+    
+    try {
+      // If it's already in AM/PM format, return as is
+      if (timeStr.includes('AM') || timeStr.includes('PM')) {
+        return timeStr;
+      }
+      
+      // Parse time string (expected format from DB: "HH:MM:SS")
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      
+      // Convert to 12-hour format
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeStr;
+    }
+  };
   
   // Fetch data on load
   useEffect(() => {
@@ -617,30 +640,6 @@ const AdminDashboard = () => {
                 </Button>
               </CardFooter>
             </Card>
-            
-            {/* Helper function to format time string for display */}
-            {function formatTimeString(timeStr) {
-              if (!timeStr) return "N/A";
-              
-              try {
-                // If it's already in AM/PM format, return as is
-                if (timeStr.includes('AM') || timeStr.includes('PM')) {
-                  return timeStr;
-                }
-                
-                // Parse time string (expected format from DB: "HH:MM:SS")
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                
-                // Convert to 12-hour format
-                const period = hours >= 12 ? 'PM' : 'AM';
-                const hours12 = hours % 12 || 12;
-                
-                return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
-              } catch (error) {
-                console.error("Error formatting time:", error);
-                return timeStr;
-              }
-            }}
             
             <Card className="transition-all hover:shadow-md">
               <CardHeader>
