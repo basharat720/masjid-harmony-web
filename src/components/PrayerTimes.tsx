@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Clock, Calendar, Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +37,7 @@ const PrayerTimes = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {prayerTimes.map((prayer) => (
-                <Card key={prayer.name} className="prayer-time-card transition-all hover:scale-105">
+                <Card key={prayer.id} className="prayer-time-card transition-all hover:scale-105">
                   <CardContent className="p-4 flex flex-col items-center">
                     <div className="text-xl font-arabic text-masjid-gold mb-1">{prayer.arabicName}</div>
                     <h3 className="font-bold text-lg text-masjid-primary">{prayer.name}</h3>
