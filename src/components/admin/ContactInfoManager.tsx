@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { MessageSquare, Pencil, Plus, Trash2, RefreshCw, MoveUp, MoveDown } from 'lucide-react';
+import { MessageSquare, Pencil, Plus, Trash2, RefreshCw } from 'lucide-react';
 
 type ContactInfo = {
   id: string;
@@ -50,7 +50,7 @@ type ContactInfo = {
 };
 
 const ContactInfoManager = () => {
-  const [contactInfos, setContactInfos] = useState<ContactInfo[]>([]);
+  const [contactInfoList, setContactInfoList] = useState<ContactInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [editContactInfo, setEditContactInfo] = useState<ContactInfo | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -58,7 +58,7 @@ const ContactInfoManager = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchContactInfos = async () => {
+  const fetchContactInfo = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -67,7 +67,7 @@ const ContactInfoManager = () => {
         .order('display_order', { ascending: true });
 
       if (error) throw error;
-      setContactInfos(data || []);
+      setContactInfoList(data || []);
     } catch (error) {
       console.error('Error fetching contact info:', error);
       toast({
@@ -81,7 +81,7 @@ const ContactInfoManager = () => {
   };
 
   useEffect(() => {
-    fetchContactInfos();
+    fetchContactInfo();
   }, []);
 
   const handleEdit = (contactInfo: ContactInfo) => {
@@ -98,7 +98,7 @@ const ContactInfoManager = () => {
 
       if (error) throw error;
 
-      setContactInfos(contactInfos.filter(info => info.id !== id));
+      setContactInfoList(contactInfoList.filter(item => item.id !== id));
       toast({
         title: 'Contact info deleted',
         description: 'The contact information has been deleted successfully.',
@@ -117,75 +117,30 @@ const ContactInfoManager = () => {
 
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
-    fetchContactInfos();
+    fetchContactInfo();
   };
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
     setEditContactInfo(null);
-    fetchContactInfos();
+    fetchContactInfo();
   };
 
-  const handleMoveUp = async (id: string, currentOrder: number) => {
-    const previousItem = contactInfos.find(item => item.display_order === currentOrder - 1);
-    if (!previousItem) return;
+  const getNextOrder = () => {
+    if (contactInfoList.length === 0) return 1;
+    return Math.max(...contactInfoList.map(item => item.display_order)) + 1;
+  };
 
-    try {
-      // Update the current item's order
-      await supabase
-        .from('contact_info')
-        .update({ display_order: currentOrder - 1, updated_at: new Date().toISOString() })
-        .eq('id', id);
-      
-      // Update the previous item's order
-      await supabase
-        .from('contact_info')
-        .update({ display_order: currentOrder, updated_at: new Date().toISOString() })
-        .eq('id', previousItem.id);
-      
-      fetchContactInfos();
-    } catch (error) {
-      console.error('Error reordering items:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to reorder items',
-        variant: 'destructive',
-      });
+  const getContactTypeLabel = (type: string) => {
+    switch(type) {
+      case 'address': return 'Address';
+      case 'phone': return 'Phone Number';
+      case 'email': return 'Email Address';
+      case 'hours': return 'Office Hours';
+      case 'social': return 'Social Media';
+      case 'other': return 'Other';
+      default: return type;
     }
-  };
-
-  const handleMoveDown = async (id: string, currentOrder: number) => {
-    const nextItem = contactInfos.find(item => item.display_order === currentOrder + 1);
-    if (!nextItem) return;
-
-    try {
-      // Update the current item's order
-      await supabase
-        .from('contact_info')
-        .update({ display_order: currentOrder + 1, updated_at: new Date().toISOString() })
-        .eq('id', id);
-      
-      // Update the next item's order
-      await supabase
-        .from('contact_info')
-        .update({ display_order: currentOrder, updated_at: new Date().toISOString() })
-        .eq('id', nextItem.id);
-      
-      fetchContactInfos();
-    } catch (error) {
-      console.error('Error reordering items:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to reorder items',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Helper function to display icon name nicely
-  const formatIconName = (iconName: string) => {
-    if (!iconName) return 'None';
-    return iconName.charAt(0).toUpperCase() + iconName.slice(1);
   };
 
   return (
@@ -201,7 +156,7 @@ const ContactInfoManager = () => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={fetchContactInfos} 
+            onClick={fetchContactInfo} 
             title="Refresh"
           >
             <RefreshCw className="h-4 w-4" />
@@ -216,10 +171,7 @@ const ContactInfoManager = () => {
               <DialogHeader>
                 <DialogTitle>Add New Contact Information</DialogTitle>
               </DialogHeader>
-              <ContactInfoForm 
-                onSuccess={handleAddSuccess} 
-                nextOrder={contactInfos.length > 0 ? Math.max(...contactInfos.map(item => item.display_order)) + 1 : 1}
-              />
+              <ContactInfoForm onSuccess={handleAddSuccess} nextOrder={getNextOrder()} />
             </DialogContent>
           </Dialog>
         </div>
@@ -229,61 +181,45 @@ const ContactInfoManager = () => {
           <div className="flex justify-center py-10">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-masjid-primary"></div>
           </div>
-        ) : contactInfos.length === 0 ? (
+        ) : contactInfoList.length === 0 ? (
           <div className="text-center py-8">
             <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
             <p className="text-muted-foreground">No contact information found</p>
-            <p className="text-sm text-muted-foreground mt-1">Add your first contact details to display them on the website</p>
+            <p className="text-sm text-muted-foreground mt-1">Add your first contact information to display it on the website</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50px]">Order</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Value</TableHead>
                 <TableHead>Icon</TableHead>
+                <TableHead>Display Order</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contactInfos.map((info) => (
-                <TableRow key={info.id}>
-                  <TableCell className="font-medium">{info.display_order}</TableCell>
-                  <TableCell className="font-medium">{info.type}</TableCell>
-                  <TableCell>{info.value}</TableCell>
-                  <TableCell>{formatIconName(info.icon)}</TableCell>
+              {contactInfoList.map((contactInfo) => (
+                <TableRow key={contactInfo.id}>
+                  <TableCell className="font-medium">{getContactTypeLabel(contactInfo.type)}</TableCell>
+                  <TableCell>{contactInfo.value}</TableCell>
+                  <TableCell>{contactInfo.icon || 'None'}</TableCell>
+                  <TableCell>{contactInfo.display_order}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button 
                         variant="ghost" 
-                        size="icon"
-                        disabled={info.display_order === 1}
-                        onClick={() => handleMoveUp(info.id, info.display_order)}
-                      >
-                        <MoveUp className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        disabled={info.display_order === contactInfos.length}
-                        onClick={() => handleMoveDown(info.id, info.display_order)}
-                      >
-                        <MoveDown className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
                         size="icon" 
-                        onClick={() => handleEdit(info)}
+                        onClick={() => handleEdit(contactInfo)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <AlertDialog open={deleteId === info.id} onOpenChange={(open) => !open && setDeleteId(null)}>
+                      <AlertDialog open={deleteId === contactInfo.id} onOpenChange={(open) => !open && setDeleteId(null)}>
                         <AlertDialogTrigger asChild>
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            onClick={() => setDeleteId(info.id)}
+                            onClick={() => setDeleteId(contactInfo.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -298,7 +234,7 @@ const ContactInfoManager = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction 
-                              onClick={() => handleDelete(info.id)}
+                              onClick={() => handleDelete(contactInfo.id)}
                               className="bg-red-500 hover:bg-red-600"
                             >
                               Delete

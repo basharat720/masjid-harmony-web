@@ -24,6 +24,11 @@ import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import PrayerTimesManager from './admin/PrayerTimesManager';
+import EventsManager from './admin/EventsManager';
+import GalleryManager from './admin/GalleryManager';
+import BlogPostManager from './admin/BlogPostManager';
+import ContactInfoManager from './admin/ContactInfoManager';
+import DonationOptionsManager from './admin/DonationOptionsManager';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -199,86 +204,16 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === "prayer-times" && <PrayerTimesManager />}
-
-          {activeTab === "events" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Events Manager</CardTitle>
-                <CardDescription>
-                  Manage upcoming events and programs
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center py-8 text-muted-foreground">
-                  Event management functionality coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "gallery" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Gallery Manager</CardTitle>
-                <CardDescription>
-                  Upload and manage images for the website gallery
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center py-8 text-muted-foreground">
-                  Gallery management functionality coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "blog" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Blog Manager</CardTitle>
-                <CardDescription>
-                  Create and edit blog articles
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center py-8 text-muted-foreground">
-                  Blog management functionality coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "contact" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-                <CardDescription>
-                  Update contact details for the masjid
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center py-8 text-muted-foreground">
-                  Contact information management functionality coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "donations" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Donation Settings</CardTitle>
-                <CardDescription>
-                  Configure donation options and messages
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center py-8 text-muted-foreground">
-                  Donation settings functionality coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          
+          {activeTab === "events" && <EventsManager />}
+          
+          {activeTab === "gallery" && <GalleryManager />}
+          
+          {activeTab === "blog" && <BlogPostManager />}
+          
+          {activeTab === "contact" && <ContactInfoManager />}
+          
+          {activeTab === "donations" && <DonationOptionsManager />}
         </div>
       </div>
     </div>
