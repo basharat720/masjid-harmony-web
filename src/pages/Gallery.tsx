@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Navbar from '../components/Navbar';
-import Gallery from '../components/Gallery';
+import GalleryComponent from '../components/Gallery';
 import Footer from '../components/Footer';
 
 const GalleryPage = () => {
@@ -9,7 +9,7 @@ const GalleryPage = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        <Gallery />
+        <GalleryComponent />
       </main>
       <Footer />
     </div>
