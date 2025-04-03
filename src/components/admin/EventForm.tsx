@@ -29,7 +29,6 @@ const eventSchema = z.object({
   date: z.string().min(1, { message: 'Date is required' }),
   time: z.string().min(1, { message: 'Time is required' }),
   location: z.string().min(1, { message: 'Location is required' }),
-  image_url: z.string().optional(),
   category: z.string().min(1, { message: 'Category is required' }),
   featured: z.boolean().default(false),
 });
@@ -44,7 +43,6 @@ interface EventFormProps {
     date: string;
     time: string;
     location: string;
-    image_url?: string;
     category: string;
     featured: boolean;
   };
@@ -78,7 +76,6 @@ export const EventForm: React.FC<EventFormProps> = ({
       date: formatDateForInput(event.date),
       time: event.time,
       location: event.location,
-      image_url: event.image_url || '',
       category: event.category,
       featured: event.featured,
     } : {
@@ -87,7 +84,6 @@ export const EventForm: React.FC<EventFormProps> = ({
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '',
       location: '',
-      image_url: '',
       category: '',
       featured: false,
     },
@@ -106,7 +102,6 @@ export const EventForm: React.FC<EventFormProps> = ({
             date: data.date,
             time: data.time,
             location: data.location,
-            image_url: data.image_url || null,
             category: data.category,
             featured: data.featured,
             updated_at: new Date().toISOString(),
@@ -129,7 +124,6 @@ export const EventForm: React.FC<EventFormProps> = ({
             date: data.date,
             time: data.time,
             location: data.location,
-            image_url: data.image_url || null,
             category: data.category,
             featured: data.featured,
           });
@@ -245,35 +239,19 @@ export const EventForm: React.FC<EventFormProps> = ({
               )}
             />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Religious, Educational" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter image URL" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Religious, Educational" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={form.control}

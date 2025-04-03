@@ -10,7 +10,6 @@ export type Event = {
   date: string;
   time: string;
   location: string;
-  image_url?: string;
   category: string;
   featured: boolean;
   created_at: string;
