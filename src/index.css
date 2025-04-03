@@ -93,7 +93,7 @@
 
 @layer components {
   .section-container {
-    @apply max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-10 md:py-14 lg:py-16;
+    @apply max-w-[82rem] mx-auto px-3 sm:px-4 lg:px-6 py-10 md:py-14 lg:py-16; /* Increased from max-w-7xl to max-w-[82rem] (approx 7-8% wider) */
   }
   
   .section-title {

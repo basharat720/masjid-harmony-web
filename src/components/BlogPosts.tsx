@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, User, Clock, ChevronRight, Search } from 'lucide-react';
+import { CalendarIcon, User, Clock, ChevronRight, Search, FileText } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -60,7 +59,6 @@ const BlogPosts = () => {
     fetchBlogPosts();
   }, []);
   
-  // Filter posts based on search term and category
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,11 +77,11 @@ const BlogPosts = () => {
   };
 
   return (
-    <section className="py-16 bg-masjid-light">
+    <section id="blog" className="py-16 bg-white">
       <div className="section-container">
-        <h1 className="section-title">Masjid Blog</h1>
+        <h2 className="section-title">Latest from Our Blog</h2>
         <p className="text-center text-masjid-navy/80 max-w-2xl mx-auto mb-10">
-          Stay updated with the latest news, events, and Islamic knowledge from our community.
+          Stay updated with our latest news, articles, and community events.
         </p>
         
         {/* Search and filters */}
@@ -190,6 +188,14 @@ const BlogPosts = () => {
             </Button>
           </div>
         )}
+        
+        <div className="text-center mt-10">
+          <Button className="cta-button" asChild>
+            <Link to="/blog">
+              <FileText size={18} className="mr-2" /> View All Posts
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );

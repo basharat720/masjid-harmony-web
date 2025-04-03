@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from 'react-router-dom';
 
 interface Event {
   id: string;
@@ -138,8 +139,10 @@ const Events = () => {
         )}
         
         <div className="text-center">
-          <Button className="cta-button">
-            <Calendar size={18} className="mr-2" /> View All Events
+          <Button className="cta-button" asChild>
+            <Link to="/events">
+              <Calendar size={18} className="mr-2" /> View All Events
+            </Link>
           </Button>
         </div>
       </div>

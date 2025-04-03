@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Tabs, 
   TabsContent, 
@@ -326,121 +326,124 @@ const Gallery = () => {
   };
 
   return (
-    <div className="section-container py-16 bg-gradient-to-b from-masjid-light to-white">
-      <h2 className="section-title mb-10 flex items-center justify-center">
-        <GalleryHorizontal className="mr-2 text-masjid-gold" size={28} />
-        <span>Our Gallery</span>
-      </h2>
-      
-      <div className="mb-6 max-w-2xl mx-auto text-center">
-        <p className="text-muted-foreground">
-          Explore our collection of images showcasing our beautiful masjid, 
-          community events, educational activities, and more.
+    <section id="gallery" className="py-16 bg-masjid-cream">
+      <div className="section-container">
+        <h2 className="section-title">Our Gallery</h2>
+        <p className="text-center text-masjid-navy/80 max-w-2xl mx-auto mb-10">
+          Explore moments from our community gatherings, events, and celebrations.
         </p>
-      </div>
-      
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-8 flex flex-wrap justify-center bg-muted/50 p-1 rounded-lg">
-          <TabsTrigger value="all" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            All
-          </TabsTrigger>
-          {categories.map(category => (
-            <TabsTrigger 
-              key={category} 
-              value={category}
-              className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
         
-        {currentFolder ? (
-          <div className="mt-6 animate-in fade-in-50 duration-300">
-            <div className="mb-6 flex items-center">
-              <Button 
-                variant="outline" 
-                className="flex items-center mr-4 group" 
-                onClick={handleBackToFolders}
-              >
-                <ArrowLeft size={16} className="mr-1 group-hover:-translate-x-1 transition-transform" /> 
-                Back to Folders
-              </Button>
-              {folderData && (
-                <h3 className="text-xl font-semibold text-masjid-primary flex items-center">
-                  <Folder size={18} className="mr-2 text-masjid-gold" />
-                  {folderData.name}
-                </h3>
-              )}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {galleryImages
-                .filter(image => image.folder === currentFolder)
-                .map(image => (
-                  <GalleryImageCard 
-                    key={image.id} 
-                    image={image} 
-                    onImageClick={() => handleImageClick(image)} 
-                  />
-                ))
-              }
-            </div>
-          </div>
-        ) : (
-          <>
-            <TabsContent value="all" className="mt-6 animate-in fade-in-50 duration-300">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {galleryFolders.map(folder => (
-                  <FolderCard key={folder.id} folder={folder} onClick={handleFolderClick} />
-                ))}
-              </div>
-            </TabsContent>
-            
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-8 flex flex-wrap justify-center bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger value="all" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              All
+            </TabsTrigger>
             {categories.map(category => (
-              <TabsContent key={category} value={category} className="mt-6 animate-in fade-in-50 duration-300">
+              <TabsTrigger 
+                key={category} 
+                value={category}
+                className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {currentFolder ? (
+            <div className="mt-6 animate-in fade-in-50 duration-300">
+              <div className="mb-6 flex items-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center mr-4 group" 
+                  onClick={handleBackToFolders}
+                >
+                  <ArrowLeft size={16} className="mr-1 group-hover:-translate-x-1 transition-transform" /> 
+                  Back to Folders
+                </Button>
+                {folderData && (
+                  <h3 className="text-xl font-semibold text-masjid-primary flex items-center">
+                    <Folder size={18} className="mr-2 text-masjid-gold" />
+                    {folderData.name}
+                  </h3>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {galleryImages
+                  .filter(image => image.folder === currentFolder)
+                  .map(image => (
+                    <GalleryImageCard 
+                      key={image.id} 
+                      image={image} 
+                      onImageClick={() => handleImageClick(image)} 
+                    />
+                  ))
+                }
+              </div>
+            </div>
+          ) : (
+            <>
+              <TabsContent value="all" className="mt-6 animate-in fade-in-50 duration-300">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {galleryFolders
-                    .filter(folder => folder.category === category)
-                    .map(folder => (
-                      <FolderCard key={folder.id} folder={folder} onClick={handleFolderClick} />
-                    ))
-                  }
+                  {galleryFolders.map(folder => (
+                    <FolderCard key={folder.id} folder={folder} onClick={handleFolderClick} />
+                  ))}
                 </div>
               </TabsContent>
-            ))}
-          </>
-        )}
-      </Tabs>
-      
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl p-1 bg-white/90 backdrop-blur-sm border shadow-lg">
-          <DialogTitle className="sr-only">Image Preview</DialogTitle>
-          <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-2 top-2 rounded-full bg-black/20 hover:bg-black/30 text-white"
-            onClick={() => setIsOpen(false)}
-          >
-            <X size={18} />
-            <span className="sr-only">Close</span>
-          </Button>
-          {selectedImage && (
-            <div className="relative">
-              <img 
-                src={selectedImage.src.replace('w=600&h=400', 'w=1200&h=800')} 
-                alt={selectedImage.alt} 
-                className="w-full h-auto rounded-md"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
-                <h3 className="font-medium text-lg">{selectedImage.alt}</h3>
-                <p className="text-sm text-white/80 capitalize">{selectedImage.category}</p>
-              </div>
-            </div>
+              
+              {categories.map(category => (
+                <TabsContent key={category} value={category} className="mt-6 animate-in fade-in-50 duration-300">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {galleryFolders
+                      .filter(folder => folder.category === category)
+                      .map(folder => (
+                        <FolderCard key={folder.id} folder={folder} onClick={handleFolderClick} />
+                      ))
+                    }
+                  </div>
+                </TabsContent>
+              ))}
+            </>
           )}
-        </DialogContent>
-      </Dialog>
-    </div>
+        </Tabs>
+        
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="max-w-4xl p-1 bg-white/90 backdrop-blur-sm border shadow-lg">
+            <DialogTitle className="sr-only">Image Preview</DialogTitle>
+            <DialogDescription className="sr-only">Larger view of the selected image</DialogDescription>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-2 top-2 rounded-full bg-black/20 hover:bg-black/30 text-white"
+              onClick={() => setIsOpen(false)}
+            >
+              <X size={18} />
+              <span className="sr-only">Close</span>
+            </Button>
+            {selectedImage && (
+              <div className="relative">
+                <img 
+                  src={selectedImage.src.replace('w=600&h=400', 'w=1200&h=800')} 
+                  alt={selectedImage.alt} 
+                  className="w-full h-auto rounded-md"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
+                  <h3 className="font-medium text-lg">{selectedImage.alt}</h3>
+                  <p className="text-sm text-white/80 capitalize">{selectedImage.category}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        
+        <div className="text-center mt-8">
+          <Button className="cta-button" asChild>
+            <Link to="/gallery">
+              <Image size={18} className="mr-2" /> View Full Gallery
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 };
 
