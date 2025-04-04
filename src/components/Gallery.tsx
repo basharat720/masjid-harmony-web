@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image, ChevronRight, Layout } from 'lucide-react';
+import { ChevronRight, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Sample gallery images for the homepage preview
@@ -36,11 +36,7 @@ const Gallery = () => {
   const navigate = useNavigate();
 
   const handleViewFullGallery = () => {
-    try {
-      navigate('/gallery');
-    } catch (error) {
-      console.error('Navigation error:', error);
-    }
+    navigate('/gallery');
   };
 
   return (
@@ -74,10 +70,10 @@ const Gallery = () => {
         
         <div className="text-center mt-8">
           <Button 
-            className="cta-button" 
+            className="cta-button flex items-center" 
             onClick={handleViewFullGallery}
           >
-            <Layout size={18} className="mr-2" /> View Full Gallery <ChevronRight size={16} />
+            <Image size={18} className="mr-2" /> View Full Gallery <ChevronRight size={16} className="ml-1" />
           </Button>
         </div>
       </div>

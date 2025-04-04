@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, FileText, Image, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -27,9 +28,14 @@ const Navbar = () => {
     }
   };
 
+  const navigateToAdmin = () => {
+    setIsMenuOpen(false);
+    navigate('/admin-login');
+  };
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
@@ -51,7 +57,7 @@ const Navbar = () => {
             </button>
             <button onClick={() => scrollToSection('contact')} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Contact</button>
             <button onClick={() => scrollToSection('donate')} className="bg-masjid-gold hover:bg-masjid-gold/90 text-masjid-navy font-medium px-4 py-2 rounded-md shadow-sm transition-colors duration-300 ml-4">Donate</button>
-            <Link to="/admin-login" className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Admin</Link>
+            <button onClick={navigateToAdmin} className="text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10">Admin</button>
           </div>
           
           {/* Mobile Navigation Toggle */}
@@ -81,7 +87,7 @@ const Navbar = () => {
             </button>
             <button onClick={() => scrollToSection('contact')} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left">Contact</button>
             <button onClick={() => scrollToSection('donate')} className="bg-masjid-gold hover:bg-masjid-gold/90 text-masjid-navy font-medium px-4 py-2 rounded-md shadow-sm transition-colors duration-300 w-full mt-4">Donate</button>
-            <Link to="/admin-login" className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left mt-4">Admin</Link>
+            <button onClick={navigateToAdmin} className="block text-masjid-navy hover:text-masjid-primary transition-colors duration-200 font-medium px-3 py-2 rounded-md hover:bg-masjid-primary/10 w-full text-left mt-4">Admin</button>
           </div>
         </div>
       )}
