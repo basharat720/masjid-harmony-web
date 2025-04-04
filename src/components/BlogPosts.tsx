@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +87,7 @@ const BlogPosts = () => {
         
         {/* Search and filters */}
         <div className="mb-8 space-y-4">
-          <div className="relative">
+          <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-masjid-navy/50" size={18} />
             <Input
               type="text"
@@ -97,7 +98,7 @@ const BlogPosts = () => {
             />
           </div>
           
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center mt-4">
             {categories.map(category => (
               <Badge 
                 key={category}
@@ -123,15 +124,19 @@ const BlogPosts = () => {
         ) : displayedPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedPosts.map(post => (
-              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 overflow-hidden">
+              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-masjid-cream group">
+                <div className="h-52 overflow-hidden">
                   <img 
                     src={post.image_url} 
                     alt={post.title} 
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
                   />
                 </div>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <div className="flex justify-between items-center mb-2">
                     <Badge variant="outline" className="bg-masjid-cream text-masjid-navy">
                       {post.category}
@@ -145,14 +150,14 @@ const BlogPosts = () => {
                       })}
                     </div>
                   </div>
-                  <CardTitle className="text-xl font-bold hover:text-masjid-gold transition-colors">
+                  <CardTitle className="text-xl font-bold text-masjid-primary group-hover:text-masjid-gold transition-colors">
                     {post.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-2">
+                  <CardDescription className="line-clamp-2 mt-1">
                     {post.excerpt}
                   </CardDescription>
                 </CardHeader>
-                <CardFooter className="flex justify-between">
+                <CardFooter className="flex justify-between pt-0">
                   <div className="flex items-center text-sm">
                     <User size={14} className="mr-1 text-masjid-navy/70" />
                     <span className="text-masjid-navy/70">{post.author}</span>
@@ -172,7 +177,9 @@ const BlogPosts = () => {
           </div>
         ) : (
           <div className="text-center py-10">
-            <p className="text-masjid-navy/70">No blog posts found matching your search criteria.</p>
+            <FileText className="mx-auto h-16 w-16 text-masjid-navy/30 mb-4" />
+            <h3 className="text-xl font-semibold text-masjid-navy">No Posts Found</h3>
+            <p className="text-masjid-navy/70 mt-2">Try adjusting your search or filter criteria</p>
           </div>
         )}
         
