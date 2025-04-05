@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +44,6 @@ const BlogPosts = () => {
         
         setBlogPosts(data || []);
         
-        // Extract unique categories
         if (data) {
           const uniqueCategories = ['All', ...new Set(data.map(post => post.category))];
           setCategories(uniqueCategories);
@@ -79,7 +77,7 @@ const BlogPosts = () => {
 
   return (
     <section id="blog" className="py-16 bg-white">
-      <div className="section-container">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="section-title">Latest from Our Blog</h2>
         <p className="text-center text-masjid-navy/80 max-w-2xl mx-auto mb-10">
           Stay updated with our latest news, articles, and community events.
