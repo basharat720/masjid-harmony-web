@@ -1,80 +1,96 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Image } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Image } from 'lucide-react';
 
-// Sample gallery images for the homepage preview
-const sampleImages = [
+const galleryAlbums = [
   {
-    id: '1',
-    title: 'Masjid Prayer Hall',
-    image_url: 'https://images.unsplash.com/photo-1564286854376-6bb49ff96ffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    id: 'masjid-exterior',
+    title: 'Masjid Exterior',
+    description: 'Views of our beautiful masjid building',
+    image: '/path/to/masjid-exterior.jpg', // Replace with actual image path
+    category: 'Masjid'
+  },
+  {
+    id: 'prayer-hall',
+    title: 'Prayer Hall',
+    description: 'Inside our main prayer hall',
+    image: '/path/to/prayer-hall.jpg', // Replace with actual image path
     category: 'Interior'
   },
   {
-    id: '2',
-    title: 'Community Gathering',
-    image_url: 'https://images.unsplash.com/photo-1526139334526-f591a54b477c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    id: 'ramadan-activities',
+    title: 'Ramadan Activities',
+    description: 'Activities during the blessed month',
+    image: '/path/to/ramadan.jpg', // Replace with actual image path
     category: 'Events'
   },
   {
-    id: '3',
-    title: 'Ramadan Celebration',
-    image_url: 'https://images.unsplash.com/photo-1563911302283-d2bc129e7570?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    category: 'Celebrations'
+    id: 'eid-celebrations',
+    title: 'Eid Celebrations',
+    description: 'Community gatherings during Eid',
+    image: '/path/to/eid.jpg', // Replace with actual image path
+    category: 'Community'
   },
   {
-    id: '4',
-    title: 'Masjid Architecture',
-    image_url: 'https://images.unsplash.com/photo-1580237072522-d715a6e7c19e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    category: 'Architecture'
+    id: 'islamic-classes',
+    title: 'Islamic Classes',
+    description: 'Learning and education programs',
+    image: '/path/to/classes.jpg', // Replace with actual image path
+    category: 'Education'
+  },
+  {
+    id: 'childrens-school',
+    title: "Children's School",
+    description: 'Our educational programs for children',
+    image: '/path/to/children.jpg', // Replace with actual image path
+    category: 'Education'
   }
 ];
 
 const Gallery = () => {
-  const navigate = useNavigate();
-
-  const handleViewFullGallery = () => {
-    navigate('/gallery');
-  };
-
   return (
-    <section id="gallery" className="py-16 bg-masjid-cream">
-      <div className="section-container">
-        <h2 className="section-title">Our Gallery</h2>
+    <section className="py-16 bg-masjid-light">
+      <div className="max-w-6xl mx-auto px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-masjid-primary mb-4">
+          Our Gallery
+        </h2>
         <p className="text-center text-masjid-navy/80 max-w-2xl mx-auto mb-10">
-          Explore moments from our community, events, and the beautiful architecture of our masjid.
+          Explore moments from our community gatherings, events, and celebrations.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-          {sampleImages.map((image) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {galleryAlbums.map((album) => (
             <div 
-              key={image.id} 
-              className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              key={album.id} 
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group"
             >
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-video overflow-hidden relative">
                 <img 
-                  src={image.image_url} 
-                  alt={image.title} 
+                  src={album.image} 
+                  alt={album.title} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
+                <div className="absolute top-3 right-3 bg-white/70 rounded-full p-2">
+                  <Image className="text-masjid-primary" />
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-masjid-navy/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                <h3 className="text-white font-semibold text-lg">{image.title}</h3>
-                <span className="text-masjid-cream/90 text-sm">{image.category}</span>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-masjid-primary mb-2">
+                  {album.title}
+                </h3>
+                <p className="text-masjid-navy/80 mb-4">
+                  {album.description}
+                </p>
+                <Link 
+                  to={`/gallery/${album.id}`} 
+                  className="text-masjid-gold hover:underline flex items-center"
+                >
+                  View Album → 
+                </Link>
               </div>
             </div>
           ))}
-        </div>
-        
-        <div className="text-center mt-8">
-          <Button 
-            className="cta-button flex items-center" 
-            onClick={handleViewFullGallery}
-          >
-            <Image size={18} className="mr-2" /> View Full Gallery <ChevronRight size={16} className="ml-1" />
-          </Button>
         </div>
       </div>
     </section>
