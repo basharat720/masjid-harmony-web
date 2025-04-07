@@ -9,7 +9,7 @@ const Hero = () => {
       {/* Decorative Islamic pattern overlay */}
       <div className="absolute inset-0 islamic-pattern bg-masjid-primary opacity-10"></div>
       
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 lg:py-40">
+      <div className="relative section-container">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6 animate-fade-in">
             Welcome to Masjid Imam Hussain
@@ -32,4 +32,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

@@ -18,22 +18,22 @@ const Index = () => {
         <section id="home">
           <Hero />
         </section>
-        <section id="prayer-times">
+        <section id="prayer-times" className="bg-masjid-light">
           <PrayerTimes />
         </section>
-        <section id="events">
+        <section id="events" className="bg-white">
           <Events />
         </section>
-        <section id="gallery">
+        <section id="gallery" className="bg-masjid-light">
           <Gallery />
         </section>
-        <section id="blog">
+        <section id="blog" className="bg-white">
           <BlogPosts />
         </section>
-        <section id="contact">
+        <section id="contact" className="bg-masjid-light">
           <Contact />
         </section>
-        <section id="donate">
+        <section id="donate" className="bg-white">
           <Donation />
         </section>
       </main>
