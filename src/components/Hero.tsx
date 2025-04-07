@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const Hero = () => {
   return (
-    <div className="relative bg-masjid-primary text-white overflow-hidden h-[600px] md:h-[650px] lg:h-[700px] px-4 sm:px-6 lg:px-8">
+    <div className="relative bg-masjid-primary text-white overflow-hidden h-[600px] md:h-[650px] lg:h-[700px] px-8 sm:px-12 lg:px-20">
       {/* Decorative Islamic pattern overlay */}
       <div className="absolute inset-0 islamic-pattern bg-masjid-primary opacity-10"></div>
       
